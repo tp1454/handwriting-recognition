@@ -1,0 +1,21 @@
+# Core ML
+torch
+torchvision
+numpy
+scikit-learn
+
+# Image processing
+opencv-python
+Pillow
+
+# API
+fastapi
+uvicorn
+
+# Utilities
+pyyaml
+tqdm
+matplotlib
+
+# Testing
+pytest

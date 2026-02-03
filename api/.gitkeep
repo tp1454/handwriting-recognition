@@ -1,0 +1,4 @@
+# FastAPI backend
+# - main.py (API endpoints)
+# - schemas.py (request/response models)
+# - dependencies.py (model loading)

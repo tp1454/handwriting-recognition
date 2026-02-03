@@ -1,0 +1,4 @@
+# Web frontend
+# - index.html (main page with canvas)
+# - script.js (canvas handling, API calls)
+# - style.css (styling)
