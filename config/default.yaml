@@ -1,0 +1,79 @@
+# =============================================================================
+# Model Architecture Configuration
+# =============================================================================
+model:
+  num_classes: 62              # Total classes: 0-9 (10) + A-Z (26) + a-z (26) = 62
+  embedding_dim: 128           # Dimensionality of feature embeddings for Siamese network
+  dropout: 0.3                 # Dropout rate for regularization
+
+# =============================================================================
+# Training Configuration
+# =============================================================================
+training:
+  epochs: 10                   # Number of training epochs
+  batch_size: 32               # Batch size for training
+  learning_rate: 0.001         # Initial learning rate (Adam optimizer)
+  weight_decay: 0.0001         # L2 regularization factor
+  early_stopping_patience: 5   # Stop training if no improvement after N epochs
+  save_every: 1                # Save checkpoint every N epochs
+
+  # Learning rate scheduler
+  scheduler:
+    type: "ReduceLROnPlateau"  # Reduce LR when validation loss plateaus
+    factor: 0.5                # Multiply LR by this factor
+    patience: 3                # Wait N epochs before reducing
+    min_lr: 0.00001           # Minimum learning rate
+
+  # Siamese network training (Phase 3)
+  siamese:
+    margin: 1.0                # Contrastive loss margin
+    similar_ratio: 0.5         # Ratio of similar pairs in training batches
+
+# =============================================================================
+# Data Configuration
+# =============================================================================
+data:
+  train_path: "data/processed/train"      # Path to preprocessed training data
+  val_path: "data/processed/val"          # Path to validation data
+  test_path: "data/processed/test"        # Path to test data
+  reference_path: "data/reference"        # Path to reference font samples
+
+  # Preprocessing
+  image_size: 28               # Target image size (28x28)
+  normalize_mean: 0.5          # Normalization mean
+  normalize_std: 0.5           # Normalization std
+
+  # Data augmentation (training only)
+  augmentation:
+    enabled: true
+    rotation_max: 15           # Max rotation angle in degrees
+    scale_range: [0.9, 1.1]   # Scale factor range
+    translation_max: 3         # Max pixel shift
+    noise_std: 0.05           # Gaussian noise standard deviation
+
+# =============================================================================
+# Model Checkpointing
+# =============================================================================
+checkpoint:
+  dir: "models/checkpoints"    # Checkpoint directory
+  save_best_only: true         # Only save when validation improves
+  monitor: "val_loss"          # Metric to monitor ('val_loss' or 'val_acc')
+  mode: "min"                  # 'min' for loss, 'max' for accuracy
+
+# =============================================================================
+# Inference Configuration
+# =============================================================================
+inference:
+  classifier_path: "models/exports/classifier.pt"   # Production classifier
+  encoder_path: "models/exports/encoder.pt"         # Production encoder (Siamese)
+  device: "cuda"               # 'cuda' or 'cpu'
+  threshold: 0.5               # Confidence threshold for predictions
+
+# =============================================================================
+# API Configuration
+# =============================================================================
+api:
+  host: "0.0.0.0"
+  port: 8000
+  reload: false                # Auto-reload on code changes (dev only)
+  workers: 4                   # Number of worker processes

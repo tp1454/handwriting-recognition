@@ -29,7 +29,7 @@ models/exports/*
 .DS_Store
 Thumbs.db
 
-# env 
+# env
 .env
 .envrc
 
