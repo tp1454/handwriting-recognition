@@ -19,3 +19,6 @@ matplotlib
 
 # Testing
 pytest
+
+# pre-commit check
+pre-commit

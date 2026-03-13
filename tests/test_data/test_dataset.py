@@ -3,6 +3,7 @@ Tests for dataset classes.
 
 Tests PyTorch Dataset implementations for loading handwriting data.
 """
+
 import pytest
 import torch
 from torch.utils.data import DataLoader
@@ -77,11 +78,11 @@ class TestDataLoaderBatching:
         """Test that shuffling works."""
         loader1 = DataLoader(mock_dataset, batch_size=8, shuffle=True)
         loader2 = DataLoader(mock_dataset, batch_size=8, shuffle=True)
-        
+
         # Get first batch from each
         batch1 = next(iter(loader1))
         batch2 = next(iter(loader2))
-        
+
         # Batches might differ due to shuffling (not guaranteed but likely)
         # Just verify both work
         assert batch1[0].shape == batch2[0].shape

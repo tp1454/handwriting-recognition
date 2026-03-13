@@ -42,7 +42,7 @@ handwriting-recognition/
 │   └── utils/             # Helper functions
 ├── tests/                 # Unit tests
 ├── api/                   # FastAPI backend (deployment)
-└── web/                   # Web frontend 
+└── web/                   # Web frontend
 ```
 
 ## 🔧 Tech Stack
