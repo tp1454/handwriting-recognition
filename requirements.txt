@@ -7,7 +7,9 @@ scikit-learn
 
 # Image processing
 opencv-python
-Pillow
+pillow
+reportlab
+fonttools
 
 # API
 fastapi
