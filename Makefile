@@ -1,7 +1,7 @@
 # Makefile for Handwriting Recognition Project
 # Automates environment setup, dependency installation, testing, and deployment
 
-.PHONY: help check setup pre-commit-install clean clean-cache clean-reports clean-venv test test-coverage test-fast test-watch info
+.PHONY: help check setup pre-commit-install quality clean clean-cache clean-reports clean-venv test test-coverage test-fast test-watch info
 
 # Default Python version
 PYTHON_VERSION := 3.12
@@ -11,6 +11,7 @@ BIN := $(VENV)/bin
 PIP := $(BIN)/pip
 PYTEST := $(BIN)/pytest
 PYTHON_VENV := $(BIN)/python
+PRE_COMMIT := $(BIN)/pre-commit
 
 # Project directories
 REPORT_DIR := $(CURDIR)/reports
@@ -32,11 +33,13 @@ ifeq ($(OS),Windows_NT)
 	PIP := $(BIN)\pip.exe
 	PYTEST := $(BIN)\pytest.exe
 	PYTHON_VENV := $(BIN)\python.exe
-	PYTHON_CANDIDATES := python$(PYTHON_VERSION) python py -$(PYTHON_VERSION)
+	PRE_COMMIT := $(BIN)\pre-commit.exe
+	PYTHON_CMD := py -$(PYTHON_VERSION)
 	RM_CMD = if exist "$(1)" rmdir /s /q "$(1)"
 	RMFILE_CMD = if exist "$(1)" del /f /q "$(1)"
 	MKDIR_CMD = if not exist "$(1)" mkdir "$(1)"
 else
+	PYTHON_CMD := $(call find_python)
 	RM_CMD = rm -rf "$(1)"
 	RMFILE_CMD = rm -f "$(1)"
 	MKDIR_CMD = mkdir -p "$(1)"
@@ -70,12 +73,15 @@ $(shell for python_cmd in $(PYTHON_CANDIDATES); do \
 done)
 endef
 
-PYTHON_CMD := $(call find_python)
-
 check: ## Check required tools are installed
 	@echo "$(BLUE)Checking required dependencies...$(NC)"
 	@echo ""
 	@echo "$(YELLOW)Checking Python $(PYTHON_VERSION) installation...$(NC)"
+
+ifeq ($(OS),Windows_NT)
+	@$(PYTHON_CMD) --version >NUL 2>&1 || (echo "$(RED)✗ Python $(PYTHON_VERSION) is not installed or not found$(NC)" && echo "$(YELLOW)  Please install Python $(PYTHON_VERSION) and ensure it is in PATH$(NC)" && exit /b 1)
+	@echo "$(GREEN)✓ Python $(PYTHON_VERSION) found via: $(PYTHON_CMD)$(NC)"
+else
 	@if [ -z "$(PYTHON_CMD)" ]; then \
 		echo "$(RED)✗ Python $(PYTHON_VERSION) is not installed or not found$(NC)"; \
 		echo "$(YELLOW)  Please install Python $(PYTHON_VERSION) and ensure it is in PATH$(NC)"; \
@@ -83,18 +89,24 @@ check: ## Check required tools are installed
 	else \
 		echo "$(GREEN)✓ Python $(PYTHON_VERSION) found at: $(PYTHON_CMD)$(NC)"; \
 	fi
+endif
 	@echo ""
 	@echo "$(BLUE)Dependency check completed.$(NC)"
 
 setup: check ## Set up venv and install dependencies
 	@echo "$(BLUE)Setting up project environment...$(NC)"
 	@echo "$(YELLOW)Creating virtual environment...$(NC)"
+
+ifeq ($(OS),Windows_NT)
+	@if not exist "$(VENV)" ( $(PYTHON_CMD) -m venv "$(VENV)" && echo "$(GREEN)Virtual environment created at $(VENV)$(NC)" ) else ( echo "$(BLUE)Virtual environment already exists at $(VENV)$(NC)" )
+else
 	@if [ ! -d "$(VENV)" ]; then \
 		$(PYTHON_CMD) -m venv $(VENV); \
 		echo "$(GREEN)Virtual environment created at $(VENV)$(NC)"; \
 	else \
 		echo "$(BLUE)Virtual environment already exists at $(VENV)$(NC)"; \
 	fi
+endif
 	@echo "$(YELLOW)Upgrading pip in virtual environment...$(NC)"
 	@$(PIP) install --upgrade pip setuptools wheel
 	@echo "$(GREEN)pip upgraded successfully.$(NC)"
@@ -115,12 +127,12 @@ endif
 
 pre-commit-install: ## activate pre-commit hooks
 	@echo "$(BLUE)Installing git hooks...$(NC)"
-	@$(BIN)/pre-commit install --config config/.pre-commit-config.yaml
+	@$(PRE_COMMIT) install --config config/.pre-commit-config.yaml
 	@echo "$(GREEN)✓ pre-commit hooks installed$(NC)"
 
 quality: ## Run all code quality checks
 	@echo "$(BLUE)Running code quality checks...$(NC)"
-	@$(BIN)/pre-commit run --all-files --config config/.pre-commit-config.yaml
+	@$(PRE_COMMIT) run --all-files --config config/.pre-commit-config.yaml
 	@echo "$(GREEN)✓ Code quality checks completed$(NC)"
 #=============================================================================
 # Testing
