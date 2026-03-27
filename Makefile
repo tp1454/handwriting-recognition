@@ -30,15 +30,15 @@ NC := \033[0m # No Color
 # OS-specific settings
 ifeq ($(OS),Windows_NT)
 	VENV := .venv
-	BIN := $(VENV)\Scripts
-	PIP := $(BIN)\pip.exe
-	PYTEST := $(BIN)\pytest.exe
-	PYTHON_VENV := $(BIN)\python.exe
-	PRE_COMMIT := $(BIN)\pre-commit.exe
-	PYTHON_CMD := py -$(PYTHON_VERSION)
-	RM_CMD = if exist "$(1)" rmdir /s /q "$(1)"
-	RMFILE_CMD = if exist "$(1)" del /f /q "$(1)"
-	MKDIR_CMD = if not exist "$(1)" mkdir "$(1)"
+	BIN := $(VENV)/Scripts
+	PIP := $(BIN)/pip.exe
+	PYTEST := $(BIN)/pytest.exe
+	PYTHON_VENV := $(BIN)/python.exe
+	PRE_COMMIT := $(BIN)/pre-commit.exe
+	PYTHON_CMD := py -$(PYTHON_VERSION_FUZZY)
+	RM_CMD = rm -rf "$(1)"
+	RMFILE_CMD = rm -f "$(1)"
+	MKDIR_CMD = mkdir -p "$(1)"
 else
 	PYTHON_CMD = $(call find_python)
 	RM_CMD = rm -rf "$(1)"
@@ -78,11 +78,15 @@ endef
 check: ## Check required tools are installed
 	@echo "$(BLUE)Checking required dependencies...$(NC)"
 	@echo ""
-	@echo "$(YELLOW)Checking Python $(PYTHON_VERSION) installation...$(NC)"
+	@echo "$(YELLOW)Checking Python installation...$(NC)"
 
 ifeq ($(OS),Windows_NT)
-	@$(PYTHON_CMD) --version >NUL 2>&1 || (echo "$(RED)✗ Python $(PYTHON_VERSION) is not installed or not found$(NC)" && echo "$(YELLOW)  Please install Python $(PYTHON_VERSION) and ensure it is in PATH$(NC)" && exit /b 1)
-	@echo "$(GREEN)✓ Python $(PYTHON_VERSION) found via: $(PYTHON_CMD)$(NC)"
+	@if ! $(PYTHON_CMD) --version >/dev/null 2>&1; then \
+		echo "$(RED)✗ Python $(PYTHON_VERSION_FUZZY).x is not installed or not found$(NC)"; \
+		echo "$(YELLOW)  Please install Python $(PYTHON_VERSION_FUZZY).x and ensure the Python launcher (py) is in PATH$(NC)"; \
+		exit 1; \
+	fi
+	@echo "$(GREEN)✓ Python $(PYTHON_VERSION_FUZZY).x found via: $(PYTHON_CMD)$(NC)"
 else
 	@if [ -z "$(PYTHON_CMD)" ]; then \
 		echo "$(RED)✗ Python $(PYTHON_VERSION_FUZZY).x is not installed or not found$(NC)"; \
@@ -100,7 +104,12 @@ setup: check ## Set up venv and install dependencies
 	@echo "$(YELLOW)Creating virtual environment...$(NC)"
 
 ifeq ($(OS),Windows_NT)
-	@if not exist "$(VENV)" ( $(PYTHON_CMD) -m venv "$(VENV)" && echo "$(GREEN)Virtual environment created at $(VENV)$(NC)" ) else ( echo "$(BLUE)Virtual environment already exists at $(VENV)$(NC)" )
+	@if [ ! -d "$(VENV)" ]; then \
+		$(PYTHON_CMD) -m venv $(VENV); \
+		echo "$(GREEN)Virtual environment created at $(VENV)$(NC)"; \
+	else \
+		echo "$(BLUE)Virtual environment already exists at $(VENV)$(NC)"; \
+	fi
 else
 	@if [ ! -d "$(VENV)" ]; then \
 		$(PYTHON_CMD) -m venv $(VENV); \
@@ -110,10 +119,10 @@ else
 	fi
 endif
 	@echo "$(YELLOW)Upgrading pip in virtual environment...$(NC)"
-	@$(PIP) install --upgrade pip setuptools wheel
+	@$(PYTHON_VENV) -m pip install --upgrade pip setuptools wheel
 	@echo "$(GREEN)pip upgraded successfully.$(NC)"
 	@echo "$(YELLOW)Installing Python dependencies in virtual environment...$(NC)"
-	@$(PIP) install -r requirements.txt
+	@$(PYTHON_VENV) -m pip install -r requirements.txt
 	@echo "$(GREEN)Dependencies installed in virtual environment.$(NC)"
 	@echo "$(BLUE)To activate the virtual environment manually:$(NC)"
 ifeq ($(OS),Windows_NT)
@@ -196,4 +205,4 @@ info: ## Show project information
 	@echo "Pip version: $$($(PIP) --version 2>/dev/null || echo 'Not installed')"
 	@echo ""
 	@echo "$(BLUE)Installed packages:$(NC)"
-	@$(PIP) list 2>/dev/null || echo "Virtual environment not set up. Run 'make install'"
+	@$(PIP) list 2>/dev/null || echo "Virtual environment not set up. Run 'make setup'"
