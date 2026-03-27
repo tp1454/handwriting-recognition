@@ -6,7 +6,7 @@ pandas
 scikit-learn
 
 # Image processing
-opencv-python
+opencv-contrib-python
 Pillow
 
 # API
@@ -23,3 +23,8 @@ pytest
 
 # pre-commit check
 pre-commit
+
+# cheat
+
+easyocr
+imutils
