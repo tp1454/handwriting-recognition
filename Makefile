@@ -1,22 +1,24 @@
 # Makefile for Handwriting Recognition Project
 # Automates environment setup, dependency installation, testing, and deployment
 
-.PHONY: help check setup pre-commit-install clean clean-cache clean-reports clean-venv test test-coverage test-fast test-watch info
+.PHONY: help check setup pre-commit-install quality clean clean-cache clean-reports clean-venv test test-coverage test-fast test-watch info
 
 # Default Python version
 PYTHON_VERSION := 3.12
+PYTHON_VERSION_FUZZY := 3
 PYTHON := python3
-VENV := venv
+VENV := .venv
 BIN := $(VENV)/bin
 PIP := $(BIN)/pip
 PYTEST := $(BIN)/pytest
 PYTHON_VENV := $(BIN)/python
+PRE_COMMIT := $(BIN)/pre-commit
 
 # Project directories
 REPORT_DIR := $(CURDIR)/reports
 
 # Python executable paths
-PYTHON_CANDIDATES := python$(PYTHON_VERSION) /usr/bin/python$(PYTHON_VERSION) /usr/local/bin/python$(PYTHON_VERSION) /opt/homebrew/bin/python$(PYTHON_VERSION)
+PYTHON_CANDIDATES := python$(PYTHON_VERSION) /usr/bin/python$(PYTHON_VERSION) /usr/local/bin/python$(PYTHON_VERSION) /opt/homebrew/bin/python$(PYTHON_VERSION) python$(PYTHON_VERSION_FUZZY) python3 python
 
 # Colors for output
 BLUE := \033[0;34m
@@ -27,16 +29,18 @@ NC := \033[0m # No Color
 
 # OS-specific settings
 ifeq ($(OS),Windows_NT)
-	VENV := venv
-	BIN := $(VENV)\Scripts
-	PIP := $(BIN)\pip.exe
-	PYTEST := $(BIN)\pytest.exe
-	PYTHON_VENV := $(BIN)\python.exe
-	PYTHON_CANDIDATES := python$(PYTHON_VERSION) python py -$(PYTHON_VERSION)
-	RM_CMD = if exist "$(1)" rmdir /s /q "$(1)"
-	RMFILE_CMD = if exist "$(1)" del /f /q "$(1)"
-	MKDIR_CMD = if not exist "$(1)" mkdir "$(1)"
+	VENV := .venv
+	BIN := $(VENV)/Scripts
+	PIP := $(BIN)/pip.exe
+	PYTEST := $(BIN)/pytest.exe
+	PYTHON_VENV := $(BIN)/python.exe
+	PRE_COMMIT := $(BIN)/pre-commit.exe
+	PYTHON_CMD := py -$(PYTHON_VERSION_FUZZY)
+	RM_CMD = rm -rf "$(1)"
+	RMFILE_CMD = rm -f "$(1)"
+	MKDIR_CMD = mkdir -p "$(1)"
 else
+	PYTHON_CMD = $(call find_python)
 	RM_CMD = rm -rf "$(1)"
 	RMFILE_CMD = rm -f "$(1)"
 	MKDIR_CMD = mkdir -p "$(1)"
@@ -61,8 +65,9 @@ help: ## Show this help message
 define find_python
 $(shell for python_cmd in $(PYTHON_CANDIDATES); do \
 	if command -v $$python_cmd >/dev/null 2>&1; then \
-		version=$$($$python_cmd --version 2>&1 | grep -o "$(PYTHON_VERSION)"); \
-		if [ "$$version" = "$(PYTHON_VERSION)" ]; then \
+		version=$$($$python_cmd -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")' 2>/dev/null); \
+		major=$$(echo $$version | cut -d. -f1); \
+		if [ "$$version" = "$(PYTHON_VERSION)" ] || [ "$$major" = "$(PYTHON_VERSION_FUZZY)" ]; then \
 			echo $$python_cmd; \
 			break; \
 		fi; \
@@ -70,36 +75,54 @@ $(shell for python_cmd in $(PYTHON_CANDIDATES); do \
 done)
 endef
 
-PYTHON_CMD := $(call find_python)
-
 check: ## Check required tools are installed
 	@echo "$(BLUE)Checking required dependencies...$(NC)"
 	@echo ""
-	@echo "$(YELLOW)Checking Python $(PYTHON_VERSION) installation...$(NC)"
+	@echo "$(YELLOW)Checking Python installation...$(NC)"
+
+ifeq ($(OS),Windows_NT)
+	@if ! $(PYTHON_CMD) --version >/dev/null 2>&1; then \
+		echo "$(RED)✗ Python $(PYTHON_VERSION_FUZZY).x is not installed or not found$(NC)"; \
+		echo "$(YELLOW)  Please install Python $(PYTHON_VERSION_FUZZY).x and ensure the Python launcher (py) is in PATH$(NC)"; \
+		exit 1; \
+	fi
+	@echo "$(GREEN)✓ Python $(PYTHON_VERSION_FUZZY).x found via: $(PYTHON_CMD)$(NC)"
+else
 	@if [ -z "$(PYTHON_CMD)" ]; then \
-		echo "$(RED)✗ Python $(PYTHON_VERSION) is not installed or not found$(NC)"; \
-		echo "$(YELLOW)  Please install Python $(PYTHON_VERSION) and ensure it is in PATH$(NC)"; \
+		echo "$(RED)✗ Python $(PYTHON_VERSION_FUZZY).x is not installed or not found$(NC)"; \
+		echo "$(YELLOW)  Please install Python $(PYTHON_VERSION_FUZZY).x and ensure it is in PATH$(NC)"; \
 		exit 1; \
 	else \
-		echo "$(GREEN)✓ Python $(PYTHON_VERSION) found at: $(PYTHON_CMD)$(NC)"; \
+		echo "$(GREEN)✓ Python found at: $(PYTHON_CMD)$(NC)"; \
 	fi
+endif
 	@echo ""
 	@echo "$(BLUE)Dependency check completed.$(NC)"
 
 setup: check ## Set up venv and install dependencies
 	@echo "$(BLUE)Setting up project environment...$(NC)"
 	@echo "$(YELLOW)Creating virtual environment...$(NC)"
+
+ifeq ($(OS),Windows_NT)
 	@if [ ! -d "$(VENV)" ]; then \
 		$(PYTHON_CMD) -m venv $(VENV); \
 		echo "$(GREEN)Virtual environment created at $(VENV)$(NC)"; \
 	else \
 		echo "$(BLUE)Virtual environment already exists at $(VENV)$(NC)"; \
 	fi
+else
+	@if [ ! -d "$(VENV)" ]; then \
+		$(PYTHON_CMD) -m venv $(VENV); \
+		echo "$(GREEN)Virtual environment created at $(VENV)$(NC)"; \
+	else \
+		echo "$(BLUE)Virtual environment already exists at $(VENV)$(NC)"; \
+	fi
+endif
 	@echo "$(YELLOW)Upgrading pip in virtual environment...$(NC)"
-	@$(PIP) install --upgrade pip setuptools wheel
+	@$(PYTHON_VENV) -m pip install --upgrade pip setuptools wheel
 	@echo "$(GREEN)pip upgraded successfully.$(NC)"
 	@echo "$(YELLOW)Installing Python dependencies in virtual environment...$(NC)"
-	@$(PIP) install -r requirements.txt
+	@$(PYTHON_VENV) -m pip install -r requirements.txt
 	@echo "$(GREEN)Dependencies installed in virtual environment.$(NC)"
 	@echo "$(BLUE)To activate the virtual environment manually:$(NC)"
 ifeq ($(OS),Windows_NT)
@@ -115,12 +138,12 @@ endif
 
 pre-commit-install: ## activate pre-commit hooks
 	@echo "$(BLUE)Installing git hooks...$(NC)"
-	@$(BIN)/pre-commit install --config config/.pre-commit-config.yaml
+	@$(PRE_COMMIT) install --config config/.pre-commit-config.yaml
 	@echo "$(GREEN)✓ pre-commit hooks installed$(NC)"
 
 quality: ## Run all code quality checks
 	@echo "$(BLUE)Running code quality checks...$(NC)"
-	@$(BIN)/pre-commit run --all-files --config config/.pre-commit-config.yaml
+	@$(PRE_COMMIT) run --all-files --config config/.pre-commit-config.yaml
 	@echo "$(GREEN)✓ Code quality checks completed$(NC)"
 #=============================================================================
 # Testing
@@ -182,4 +205,4 @@ info: ## Show project information
 	@echo "Pip version: $$($(PIP) --version 2>/dev/null || echo 'Not installed')"
 	@echo ""
 	@echo "$(BLUE)Installed packages:$(NC)"
-	@$(PIP) list 2>/dev/null || echo "Virtual environment not set up. Run 'make install'"
+	@$(PIP) list 2>/dev/null || echo "Virtual environment not set up. Run 'make setup'"
