@@ -3,23 +3,47 @@ repos:
     rev: v6.0.0
     hooks:
       - id: check-yaml
+        verbose: true
+        log_file: reports/pre-commit/_hook-check-yaml.log
       - id: end-of-file-fixer
+        verbose: true
+        log_file: reports/pre-commit/_hook-end-of-file-fixer.log
       - id: trailing-whitespace
+        verbose: true
+        log_file: reports/pre-commit/_hook-trailing-whitespace.log
+      - id: check-merge-conflict
+        verbose: true
+        log_file: reports/pre-commit/_hook-check-merge-conflict.log
 
   - repo: https://github.com/pycqa/isort
     rev: 8.0.1
     hooks:
       - id: isort
         args: [--settings-path, config/.isort.cfg]
+        verbose: true
+        log_file: reports/pre-commit/_hook-isort.log
 
   - repo: https://github.com/psf/black
     rev: 26.3.1
     hooks:
       - id: black
         args: [--config, config/pyproject.toml]
+        verbose: true
+        log_file: reports/pre-commit/_hook-black.log
 
   - repo: https://github.com/pycqa/flake8
     rev: 7.2.0
     hooks:
       - id: flake8
         args: [--config, config/.flake8]
+        verbose: true
+        log_file: reports/pre-commit/_hook-flake8.log
+
+  - repo: local
+    hooks:
+      - id: pre-commit-log
+        name: pre-commit log to reports
+        entry: bash -c 'mkdir -p reports/pre-commit && ts="$(date -u +%Y%m%dT%H%M%SZ)" && branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo unknown)" && head_sha="$(git rev-parse --short HEAD 2>/dev/null || echo nohead)" && staged="$(git diff --cached --name-only | wc -l | tr -d " ")" && run_log="reports/pre-commit/${ts}-${branch}-${head_sha}.log" && { echo "timestamp_utc=${ts}"; echo "branch=${branch}"; echo "head_commit=${head_sha}"; echo "staged_files=${staged}"; echo "staged_list="; git diff --cached --name-only; echo; echo "pre_commit_output="; for f in reports/pre-commit/_hook-*.log; do [ -f "$f" ] || continue; echo; echo "--- ${f} ---"; cat "$f"; done; } > "$run_log" && rm -f reports/pre-commit/_hook-*.log'
+        language: system
+        pass_filenames: false
+        always_run: true

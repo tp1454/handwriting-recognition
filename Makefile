@@ -5,8 +5,9 @@
 
 # Default Python version
 PYTHON_VERSION := 3.12
+PYTHON_VERSION_FUZZY := 3
 PYTHON := python3
-VENV := venv
+VENV := .venv
 BIN := $(VENV)/bin
 PIP := $(BIN)/pip
 PYTEST := $(BIN)/pytest
@@ -17,7 +18,7 @@ PRE_COMMIT := $(BIN)/pre-commit
 REPORT_DIR := $(CURDIR)/reports
 
 # Python executable paths
-PYTHON_CANDIDATES := python$(PYTHON_VERSION) /usr/bin/python$(PYTHON_VERSION) /usr/local/bin/python$(PYTHON_VERSION) /opt/homebrew/bin/python$(PYTHON_VERSION)
+PYTHON_CANDIDATES := python$(PYTHON_VERSION) /usr/bin/python$(PYTHON_VERSION) /usr/local/bin/python$(PYTHON_VERSION) /opt/homebrew/bin/python$(PYTHON_VERSION) python$(PYTHON_VERSION_FUZZY) python3 python
 
 # Colors for output
 BLUE := \033[0;34m
@@ -28,7 +29,7 @@ NC := \033[0m # No Color
 
 # OS-specific settings
 ifeq ($(OS),Windows_NT)
-	VENV := venv
+	VENV := .venv
 	BIN := $(VENV)\Scripts
 	PIP := $(BIN)\pip.exe
 	PYTEST := $(BIN)\pytest.exe
@@ -39,7 +40,7 @@ ifeq ($(OS),Windows_NT)
 	RMFILE_CMD = if exist "$(1)" del /f /q "$(1)"
 	MKDIR_CMD = if not exist "$(1)" mkdir "$(1)"
 else
-	PYTHON_CMD := $(call find_python)
+	PYTHON_CMD = $(call find_python)
 	RM_CMD = rm -rf "$(1)"
 	RMFILE_CMD = rm -f "$(1)"
 	MKDIR_CMD = mkdir -p "$(1)"
@@ -64,8 +65,9 @@ help: ## Show this help message
 define find_python
 $(shell for python_cmd in $(PYTHON_CANDIDATES); do \
 	if command -v $$python_cmd >/dev/null 2>&1; then \
-		version=$$($$python_cmd --version 2>&1 | grep -o "$(PYTHON_VERSION)"); \
-		if [ "$$version" = "$(PYTHON_VERSION)" ]; then \
+		version=$$($$python_cmd -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")' 2>/dev/null); \
+		major=$$(echo $$version | cut -d. -f1); \
+		if [ "$$version" = "$(PYTHON_VERSION)" ] || [ "$$major" = "$(PYTHON_VERSION_FUZZY)" ]; then \
 			echo $$python_cmd; \
 			break; \
 		fi; \
@@ -83,11 +85,11 @@ ifeq ($(OS),Windows_NT)
 	@echo "$(GREEN)✓ Python $(PYTHON_VERSION) found via: $(PYTHON_CMD)$(NC)"
 else
 	@if [ -z "$(PYTHON_CMD)" ]; then \
-		echo "$(RED)✗ Python $(PYTHON_VERSION) is not installed or not found$(NC)"; \
-		echo "$(YELLOW)  Please install Python $(PYTHON_VERSION) and ensure it is in PATH$(NC)"; \
+		echo "$(RED)✗ Python $(PYTHON_VERSION_FUZZY).x is not installed or not found$(NC)"; \
+		echo "$(YELLOW)  Please install Python $(PYTHON_VERSION_FUZZY).x and ensure it is in PATH$(NC)"; \
 		exit 1; \
 	else \
-		echo "$(GREEN)✓ Python $(PYTHON_VERSION) found at: $(PYTHON_CMD)$(NC)"; \
+		echo "$(GREEN)✓ Python found at: $(PYTHON_CMD)$(NC)"; \
 	fi
 endif
 	@echo ""
