@@ -130,7 +130,9 @@ class TestCNNClassifierEmbedding:
 
         # Check unit norm
         norms = torch.norm(normalized, dim=1)
-        np.testing.assert_array_almost_equal(norms.detach().numpy(), np.ones(8), decimal=5)
+        np.testing.assert_array_almost_equal(
+            norms.detach().numpy(), np.ones(8), decimal=5
+        )
 
     def test_embedding_consistency(self, sample_single_image):
         """Test that same input produces same embedding."""

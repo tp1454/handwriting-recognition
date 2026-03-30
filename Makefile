@@ -84,12 +84,41 @@ ifeq ($(OS),Windows_NT)
 	@$(PYTHON_CMD) --version >NUL 2>&1 || (echo "$(RED)✗ Python $(PYTHON_VERSION) is not installed or not found$(NC)" && echo "$(YELLOW)  Please install Python $(PYTHON_VERSION) and ensure it is in PATH$(NC)" && exit /b 1)
 	@echo "$(GREEN)✓ Python $(PYTHON_VERSION) found via: $(PYTHON_CMD)$(NC)"
 else
-	@if [ -z "$(PYTHON_CMD)" ]; then \
+	@resolved_python="$(PYTHON_CMD)"; \
+	python_source="default"; \
+	if command -v pyenv >/dev/null 2>&1; then \
+		pyenv_available=1; \
+	else \
+		pyenv_available=0; \
+	fi; \
+	if [ -t 0 ] && [ -t 1 ]; then \
+		if [ "$$pyenv_available" -eq 1 ]; then \
+			printf "$(YELLOW)Use pyenv-managed Python for this run? [Y/n]: $(NC)"; \
+			read -r use_pyenv; \
+			case "$$use_pyenv" in \
+				n|N|no|NO) ;; \
+				*) python_source="pyenv"; resolved_python="pyenv exec python" ;; \
+			esac; \
+		else \
+			echo "$(YELLOW)pyenv not found. Using default Python discovery.$(NC)"; \
+		fi; \
+	elif [ "$$pyenv_available" -eq 1 ]; then \
+		python_source="pyenv"; \
+		resolved_python="pyenv exec python"; \
+	fi; \
+	if ! ( [ -n "$$resolved_python" ] && $$resolved_python --version >/dev/null 2>&1 ); then \
+		if [ "$$python_source" = "pyenv" ]; then \
+			echo "$(YELLOW)pyenv Python is unavailable. Falling back to default Python discovery.$(NC)"; \
+			resolved_python="$(PYTHON_CMD)"; \
+			python_source="default"; \
+		fi; \
+	fi; \
+	if ! ( [ -n "$$resolved_python" ] && $$resolved_python --version >/dev/null 2>&1 ); then \
 		echo "$(RED)✗ Python $(PYTHON_VERSION_FUZZY).x is not installed or not found$(NC)"; \
 		echo "$(YELLOW)  Please install Python $(PYTHON_VERSION_FUZZY).x and ensure it is in PATH$(NC)"; \
 		exit 1; \
 	else \
-		echo "$(GREEN)✓ Python found at: $(PYTHON_CMD)$(NC)"; \
+		echo "$(GREEN)✓ Python found via $$python_source: $$resolved_python$(NC)"; \
 	fi
 endif
 	@echo ""
@@ -102,8 +131,43 @@ setup: check ## Set up venv and install dependencies
 ifeq ($(OS),Windows_NT)
 	@if not exist "$(VENV)" ( $(PYTHON_CMD) -m venv "$(VENV)" && echo "$(GREEN)Virtual environment created at $(VENV)$(NC)" ) else ( echo "$(BLUE)Virtual environment already exists at $(VENV)$(NC)" )
 else
-	@if [ ! -d "$(VENV)" ]; then \
-		$(PYTHON_CMD) -m venv $(VENV); \
+	@resolved_python="$(PYTHON_CMD)"; \
+	python_source="default"; \
+	if command -v pyenv >/dev/null 2>&1; then \
+		pyenv_available=1; \
+	else \
+		pyenv_available=0; \
+	fi; \
+	if [ -t 0 ] && [ -t 1 ]; then \
+		if [ "$$pyenv_available" -eq 1 ]; then \
+			printf "$(YELLOW)Use pyenv-managed Python for this run? [Y/n]: $(NC)"; \
+			read -r use_pyenv; \
+			case "$$use_pyenv" in \
+				n|N|no|NO) ;; \
+				*) python_source="pyenv"; resolved_python="pyenv exec python" ;; \
+			esac; \
+		else \
+			echo "$(YELLOW)pyenv not found. Using default Python discovery.$(NC)"; \
+		fi; \
+	elif [ "$$pyenv_available" -eq 1 ]; then \
+		python_source="pyenv"; \
+		resolved_python="pyenv exec python"; \
+	fi; \
+	if ! ( [ -n "$$resolved_python" ] && $$resolved_python --version >/dev/null 2>&1 ); then \
+		if [ "$$python_source" = "pyenv" ]; then \
+			echo "$(YELLOW)pyenv Python is unavailable. Falling back to default Python discovery.$(NC)"; \
+			resolved_python="$(PYTHON_CMD)"; \
+			python_source="default"; \
+		fi; \
+	fi; \
+	if ! ( [ -n "$$resolved_python" ] && $$resolved_python --version >/dev/null 2>&1 ); then \
+		echo "$(RED)✗ Python $(PYTHON_VERSION_FUZZY).x is not installed or not found$(NC)"; \
+		echo "$(YELLOW)  Please install Python $(PYTHON_VERSION_FUZZY).x and ensure it is in PATH$(NC)"; \
+		exit 1; \
+	fi; \
+	echo "$(GREEN)Using $$python_source Python for setup: $$resolved_python$(NC)"; \
+	if [ ! -d "$(VENV)" ]; then \
+		$$resolved_python -m venv $(VENV); \
 		echo "$(GREEN)Virtual environment created at $(VENV)$(NC)"; \
 	else \
 		echo "$(BLUE)Virtual environment already exists at $(VENV)$(NC)"; \

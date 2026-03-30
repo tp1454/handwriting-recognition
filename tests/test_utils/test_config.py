@@ -4,6 +4,8 @@ Tests for configuration utilities.
 Tests YAML configuration loading and validation.
 """
 
+from pathlib import Path
+
 import pytest
 import yaml
 
@@ -67,8 +69,15 @@ class TestConfigDataclass:
 
         data = {
             "model": {"num_classes": 62, "embedding_dim": 128},
-            "training": {"epochs": 10, "batch_size": 32, "learning_rate": 0.001},
-            "data": {"train_path": "data/train", "val_path": "data/val"},
+            "training": {
+                "epochs": 10,
+                "batch_size": 32,
+                "learning_rate": 0.001,
+            },
+            "data": {
+                "train_path": "data/train",
+                "val_path": "data/val",
+            },
         }
 
         config = Config.from_dict(data)
@@ -156,3 +165,58 @@ class TestEnvironmentVariables:
 
         level = get_log_level()
         assert level == "DEBUG"
+
+    def test_default_log_level(self, monkeypatch):
+        """Test default LOG_LEVEL when not set."""
+        from src.utils.config import get_log_level
+
+        monkeypatch.delenv("LOG_LEVEL", raising=False)
+
+        level = get_log_level()
+        assert level == "INFO"
+
+
+class TestFullConfigSchema:
+    """Tests for full typed schema backed by repository config file."""
+
+    def test_from_yaml_loads_all_top_level_sections(self):
+        """Ensure all sections from default YAML are available."""
+        from src.utils.config import Config
+
+        config_path = Path("config/default.yaml")
+        config = Config.from_yaml(config_path)
+
+        assert config.model is not None
+        assert config.training is not None
+        assert config.data is not None
+        assert config.checkpoint is not None
+        assert config.inference is not None
+        assert config.api is not None
+
+    def test_nested_training_and_data_sections(self):
+        """Ensure nested scheduler/siamese/augmentation sections map correctly."""
+        from src.utils.config import Config
+
+        config = Config.from_yaml(Path("config/default.yaml"))
+
+        assert config.training.scheduler.type == "ReduceLROnPlateau"
+        assert config.training.scheduler.factor == 0.5
+        assert config.training.siamese.margin == 1.0
+        assert config.training.siamese.similar_ratio == 0.5
+        assert config.data.augmentation.enabled is True
+        assert config.data.augmentation.scale_range == (0.9, 1.1)
+
+    def test_inference_checkpoint_and_api_sections(self):
+        """Ensure inference/checkpoint/api fields are typed and populated."""
+        from src.utils.config import Config
+
+        config = Config.from_yaml(Path("config/default.yaml"))
+
+        assert config.checkpoint.dir == "models/checkpoints"
+        assert config.checkpoint.mode in {"min", "max"}
+        assert config.inference.classifier_path.endswith(
+            "classifier.pt"
+        )
+        assert config.inference.threshold == 0.5
+        assert config.api.host == "0.0.0.0"
+        assert config.api.port == 8000

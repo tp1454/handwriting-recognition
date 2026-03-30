@@ -15,7 +15,9 @@ import torch.nn.functional as F
 class TestTrainer:
     """Tests for Trainer class."""
 
-    def test_trainer_initialization(self, mock_dataset, model_config, train_config):
+    def test_trainer_initialization(
+        self, mock_dataset, model_config, train_config
+    ):
         """Test trainer initializes correctly."""
         from src.models.cnn_classifier import CNNClassifier
         from src.training.trainer import Trainer
@@ -32,7 +34,9 @@ class TestTrainer:
         from src.training.trainer import Trainer
 
         model = CNNClassifier(**model_config)
-        trainer = Trainer(model, epochs=1, batch_size=8, learning_rate=0.001)
+        trainer = Trainer(
+            model, epochs=1, batch_size=8, learning_rate=0.001
+        )
 
         loss = trainer.train_epoch(mock_dataloader)
 
@@ -45,7 +49,9 @@ class TestTrainer:
         from src.training.trainer import Trainer
 
         model = CNNClassifier(**model_config)
-        trainer = Trainer(model, epochs=1, batch_size=8, learning_rate=0.001)
+        trainer = Trainer(
+            model, epochs=1, batch_size=8, learning_rate=0.001
+        )
 
         val_loss, val_acc = trainer.validate(mock_dataloader)
 
@@ -116,38 +122,53 @@ class TestCheckpointing:
         optimizer = torch.optim.Adam(model.parameters())
 
         checkpoint_path = temp_checkpoint_dir / "checkpoint.pt"
-        save_checkpoint(model, optimizer, epoch=5, path=checkpoint_path)
+        save_checkpoint(
+            model, optimizer, epoch=5, path=checkpoint_path
+        )
 
         assert checkpoint_path.exists()
 
     def test_load_checkpoint(self, temp_checkpoint_dir, model_config):
         """Test loading a checkpoint."""
         from src.models.cnn_classifier import CNNClassifier
-        from src.training.trainer import load_checkpoint, save_checkpoint
+        from src.training.trainer import (
+            load_checkpoint,
+            save_checkpoint,
+        )
 
         model = CNNClassifier(**model_config)
         optimizer = torch.optim.Adam(model.parameters())
 
         # Save
         checkpoint_path = temp_checkpoint_dir / "checkpoint.pt"
-        save_checkpoint(model, optimizer, epoch=5, path=checkpoint_path)
+        save_checkpoint(
+            model, optimizer, epoch=5, path=checkpoint_path
+        )
 
         # Load into new model
         new_model = CNNClassifier(**model_config)
         new_optimizer = torch.optim.Adam(new_model.parameters())
 
-        epoch = load_checkpoint(new_model, new_optimizer, path=checkpoint_path)
+        epoch = load_checkpoint(
+            new_model, new_optimizer, path=checkpoint_path
+        )
 
         assert epoch == 5
 
-    def test_best_model_saved(self, temp_checkpoint_dir, model_config, mock_dataloader):
+    def test_best_model_saved(
+        self, temp_checkpoint_dir, model_config, mock_dataloader
+    ):
         """Test that best model is saved during training."""
         from src.models.cnn_classifier import CNNClassifier
         from src.training.trainer import Trainer
 
         model = CNNClassifier(**model_config)
         trainer = Trainer(
-            model, epochs=2, batch_size=8, learning_rate=0.001, checkpoint_dir=temp_checkpoint_dir
+            model,
+            epochs=2,
+            batch_size=8,
+            learning_rate=0.001,
+            checkpoint_dir=temp_checkpoint_dir,
         )
 
         trainer.fit(mock_dataloader, mock_dataloader)
@@ -184,13 +205,17 @@ class TestOptimizer:
 class TestGradientClipping:
     """Tests for gradient clipping."""
 
-    def test_gradient_clipping_applied(self, model_config, mock_dataloader):
+    def test_gradient_clipping_applied(
+        self, model_config, mock_dataloader
+    ):
         """Test that gradient clipping is applied."""
         from src.models.cnn_classifier import CNNClassifier
         from src.training.trainer import Trainer
 
         model = CNNClassifier(**model_config)
-        trainer = Trainer(model, epochs=1, learning_rate=0.001, max_grad_norm=1.0)
+        trainer = Trainer(
+            model, epochs=1, learning_rate=0.001, max_grad_norm=1.0
+        )
 
         # Train one batch
         for images, labels in mock_dataloader:
@@ -224,7 +249,9 @@ class TestGradientClipping:
 class TestFullTraining:
     """Integration tests for full training loop."""
 
-    def test_full_training_loop(self, mock_dataloader, model_config, temp_checkpoint_dir):
+    def test_full_training_loop(
+        self, mock_dataloader, model_config, temp_checkpoint_dir
+    ):
         """Test complete training loop."""
         from src.models.cnn_classifier import CNNClassifier
         from src.training.trainer import Trainer

@@ -69,6 +69,21 @@ inference:
   device: "cuda"               # 'cuda' or 'cpu'
   threshold: 0.5               # Confidence threshold for predictions
 
+  # EasyOCR detect defaults
+  easyocr_detect:
+    min_size: 10
+    text_threshold: 0.7
+    low_text: 0.4
+    link_threshold: 0.4
+    canvas_size: 2560
+    mag_ratio: 1.0
+    slope_ths: 0.1
+    ycenter_ths: 0.5
+    height_ths: 0.5
+    width_ths: 0.5
+    add_margin: 0.1
+    optimal_num_chars: null
+
 # =============================================================================
 # API Configuration
 # =============================================================================

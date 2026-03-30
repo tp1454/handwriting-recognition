@@ -35,11 +35,15 @@ class TestModelIO:
         save_model(original_model, temp_model_path)
 
         # Load
-        loaded_model = load_model(CNNClassifier, temp_model_path, **model_config)
+        loaded_model = load_model(
+            CNNClassifier, temp_model_path, **model_config
+        )
 
         assert loaded_model is not None
 
-    def test_loaded_model_same_weights(self, temp_model_path, model_config, sample_batch):
+    def test_loaded_model_same_weights(
+        self, temp_model_path, model_config, sample_batch
+    ):
         """Test that loaded model has same weights."""
         from src.models.cnn_classifier import CNNClassifier
         from src.utils.io import load_model, save_model
@@ -53,7 +57,9 @@ class TestModelIO:
         save_model(original_model, temp_model_path)
 
         # Load
-        loaded_model = load_model(CNNClassifier, temp_model_path, **model_config)
+        loaded_model = load_model(
+            CNNClassifier, temp_model_path, **model_config
+        )
         loaded_model.eval()
         with torch.no_grad():
             loaded_output = loaded_model(sample_batch)
@@ -66,7 +72,11 @@ class TestModelIO:
         from src.utils.io import load_model
 
         with pytest.raises(FileNotFoundError):
-            load_model(CNNClassifier, tmp_path / "nonexistent.pt", num_classes=62)
+            load_model(
+                CNNClassifier,
+                tmp_path / "nonexistent.pt",
+                num_classes=62,
+            )
 
 
 class TestImageIO:

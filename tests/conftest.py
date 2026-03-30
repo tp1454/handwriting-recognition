@@ -157,7 +157,9 @@ def mock_dataset():
 @pytest.fixture
 def mock_dataloader(mock_dataset):
     """Create a mock dataloader."""
-    return torch.utils.data.DataLoader(mock_dataset, batch_size=8, shuffle=True)
+    return torch.utils.data.DataLoader(
+        mock_dataset, batch_size=8, shuffle=True
+    )
 
 
 # =============================================================================

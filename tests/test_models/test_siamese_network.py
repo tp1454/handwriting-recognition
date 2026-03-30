@@ -113,7 +113,9 @@ class TestSiameseSimilarity:
         assert similarity.min() >= -1.0
         assert similarity.max() <= 1.0
 
-    def test_identical_inputs_high_similarity(self, sample_single_image):
+    def test_identical_inputs_high_similarity(
+        self, sample_single_image
+    ):
         """Test that identical inputs have high similarity."""
         from src.models.cnn_classifier import CNNClassifier
         from src.models.siamese_network import SiameseNetwork
@@ -123,7 +125,9 @@ class TestSiameseSimilarity:
         model.eval()
 
         with torch.no_grad():
-            emb1, emb2 = model(sample_single_image, sample_single_image)
+            emb1, emb2 = model(
+                sample_single_image, sample_single_image
+            )
             similarity = F.cosine_similarity(emb1, emb2)
 
         # Identical inputs should have perfect similarity

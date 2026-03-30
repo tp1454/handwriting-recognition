@@ -41,7 +41,10 @@ class TestLossPlotting:
 
     def test_save_loss_plot(self, tmp_path):
         """Test saving loss plot to file."""
-        from src.utils.visualization import plot_loss_curve, save_figure
+        from src.utils.visualization import (
+            plot_loss_curve,
+            save_figure,
+        )
 
         losses = [1.0, 0.8, 0.6, 0.5, 0.4]
         fig = plot_loss_curve(losses)
@@ -71,17 +74,24 @@ class TestSamplePlotting:
 
         labels = ["0", "1", "2", "3", "4", "5", "6", "7"]
 
-        fig = plot_sample_grid(sample_batch_numpy, labels, grid_size=(2, 4))
+        fig = plot_sample_grid(
+            sample_batch_numpy, labels, grid_size=(2, 4)
+        )
 
         assert fig is not None
         plt.close(fig)
 
     def test_plot_augmentation_comparison(self, sample_numpy_image):
         """Test plotting original vs augmented."""
-        from src.utils.visualization import plot_augmentation_comparison
+        from src.utils.visualization import (
+            plot_augmentation_comparison,
+        )
 
         original = sample_numpy_image
-        augmented = sample_numpy_image + np.random.randn(*sample_numpy_image.shape) * 10
+        augmented = (
+            sample_numpy_image
+            + np.random.randn(*sample_numpy_image.shape) * 10
+        )
 
         fig = plot_augmentation_comparison(original, augmented)
 
@@ -120,7 +130,9 @@ class TestConfusionMatrixPlotting:
 class TestEmbeddingVisualization:
     """Tests for embedding visualization."""
 
-    def test_plot_embeddings_tsne(self, sample_embeddings, sample_labels):
+    def test_plot_embeddings_tsne(
+        self, sample_embeddings, sample_labels
+    ):
         """Test t-SNE visualization of embeddings."""
         from src.utils.visualization import plot_embeddings_tsne
 
@@ -133,11 +145,15 @@ class TestEmbeddingVisualization:
         assert fig is not None
         plt.close(fig)
 
-    def test_plot_embeddings_pca(self, sample_embeddings, sample_labels):
+    def test_plot_embeddings_pca(
+        self, sample_embeddings, sample_labels
+    ):
         """Test PCA visualization of embeddings."""
         from src.utils.visualization import plot_embeddings_pca
 
-        fig = plot_embeddings_pca(sample_embeddings.numpy(), sample_labels.numpy())
+        fig = plot_embeddings_pca(
+            sample_embeddings.numpy(), sample_labels.numpy()
+        )
 
         assert fig is not None
         plt.close(fig)
@@ -177,7 +193,12 @@ class TestPredictionVisualization:
         """Test plotting image with prediction."""
         from src.utils.visualization import plot_prediction
 
-        fig = plot_prediction(sample_numpy_image, predicted="A", confidence=0.95, actual="A")
+        fig = plot_prediction(
+            sample_numpy_image,
+            predicted="A",
+            confidence=0.95,
+            actual="A",
+        )
 
         assert fig is not None
         plt.close(fig)

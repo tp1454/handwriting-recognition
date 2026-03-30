@@ -2,3 +2,11 @@
 # - dataset.py (PyTorch Dataset classes)
 # - preprocessing.py (image preprocessing)
 # - augmentation.py (data augmentation)
+
+from .preprocessing import (
+    center_image,
+    normalize,
+    preprocess,
+    resize,
+    to_grayscale,
+)
