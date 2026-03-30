@@ -77,3 +77,67 @@ api:
   port: 8000
   reload: false                # Auto-reload on code changes (dev only)
   workers: 4                   # Number of worker processes
+
+#==============================================================================
+# Handwriting Sheet Generation Configuration
+#==============================================================================
+sheet:
+  font_name: "handwriting_sheet"
+  save_path: "data/user_samples"
+  en_filename: "english_sheet.pdf"
+  vi_filename: "vietnamese_sheet.pdf"
+
+  # Kích thước và khoảng cách
+  font_size: 15
+  line_spacing: 20  # Đã tính toán từ (size + 5)
+  word_spacing: 20
+
+  # Kích thước giấy A4 (Point)
+  width: 594
+  height: 841
+
+  # Căn lề
+  margin_left: 40
+  margin_right: 555
+  margin_top: 802
+  margin_bottom: 40
+
+  # Chia lưới
+  divide_horizontal: 421
+  divide_vertical: 297
+
+  # Nội dung Tiếng Anh
+  en_text: |
+    The quick brown fox jumps over the lazy dog
+    THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG
+
+  # Nội dung Tiếng Việt
+  vi_text: |
+    a à á ả ã ạ
+    ă ằ ắ ẳ ẵ ặ
+    â ầ ấ ẩ ẫ ậ
+    e è é ẻ ẽ ẹ
+    ê ề ế ể ễ ệ
+    i ì í ỉ ĩ ị
+    o ò ó ỏ õ ọ
+    ô ồ ố ổ ỗ ộ
+    ơ ờ ớ ở ỡ ợ
+    u ù ú ủ ũ ụ
+    ư ừ ứ ử ữ ự
+    y ỳ ý ỷ ỹ ỵ
+
+    A À Á Ả Ã Ạ
+    Ă Ằ Ắ Ẳ Ẵ Ặ
+    Â Ầ Ấ Ẩ Ẫ Ậ
+    E È É Ẻ Ẽ Ẹ
+    Ê Ề Ế Ể Ễ Ệ
+    I Ì Í Ỉ Ĩ Ị
+    O Ò Ó Ỏ Õ Ọ
+    Ô Ồ Ố Ổ Ỗ Ộ
+    Ơ Ờ Ớ Ở Ỡ Ợ
+    U Ù Ú Ủ Ũ Ụ
+    Ư Ừ Ứ Ử Ữ Ự
+    Y Ỳ Ý Ỷ Ỹ Ỵ
+
+    b c d đ g h k l m n p q r s t v x
+    B C D Đ G H K L M N P Q R S T V X

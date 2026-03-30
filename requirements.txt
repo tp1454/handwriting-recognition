@@ -10,6 +10,9 @@ opencv-contrib-python
 pillow
 reportlab
 fonttools
+pymupdf
+
+
 
 # API
 fastapi
