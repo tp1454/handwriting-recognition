@@ -71,7 +71,10 @@ class TestNormalization:
         from src.data.preprocessing import normalize
 
         normalized = normalize(sample_image_28x28)
-        assert normalized.dtype == np.float32 or normalized.dtype == np.float64
+        assert (
+            normalized.dtype == np.float32
+            or normalized.dtype == np.float64
+        )
 
     def test_normalization_preserves_shape(self, sample_image_28x28):
         """Test that normalization preserves image shape."""

@@ -92,8 +92,12 @@ class TestContrastiveLoss:
         emb2 = torch.tensor([[0.5, 0.0]])
         label = torch.tensor([0])  # Different class
 
-        loss_small_margin = ContrastiveLoss(margin=0.3)(emb1, emb2, label)
-        loss_large_margin = ContrastiveLoss(margin=2.0)(emb1, emb2, label)
+        loss_small_margin = ContrastiveLoss(margin=0.3)(
+            emb1, emb2, label
+        )
+        loss_large_margin = ContrastiveLoss(margin=2.0)(
+            emb1, emb2, label
+        )
 
         # Larger margin should give higher loss
         assert loss_large_margin.item() > loss_small_margin.item()
@@ -149,8 +153,12 @@ class TestTripletLoss:
         positive = torch.tensor([[0.5, 0.0]])
         negative = torch.tensor([[1.0, 0.0]])
 
-        loss_small = TripletLoss(margin=0.1)(anchor, positive, negative)
-        loss_large = TripletLoss(margin=2.0)(anchor, positive, negative)
+        loss_small = TripletLoss(margin=0.1)(
+            anchor, positive, negative
+        )
+        loss_large = TripletLoss(margin=2.0)(
+            anchor, positive, negative
+        )
 
         assert loss_large.item() > loss_small.item()
 

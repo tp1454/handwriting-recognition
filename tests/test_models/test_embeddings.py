@@ -35,7 +35,9 @@ class TestEmbeddingExtractor:
         embeddings = extractor(sample_batch)
         norms = torch.norm(embeddings, dim=1)
 
-        np.testing.assert_array_almost_equal(norms.detach().numpy(), np.ones(8), decimal=5)
+        np.testing.assert_array_almost_equal(
+            norms.detach().numpy(), np.ones(8), decimal=5
+        )
 
     def test_embedding_batch_independence(self, sample_single_image):
         """Test that embeddings are computed independently per sample."""
@@ -57,7 +59,9 @@ class TestEmbeddingExtractor:
 
         # All embeddings in batch should match single
         for i in range(4):
-            assert torch.allclose(batch_emb[i], single_emb[0], atol=1e-5)
+            assert torch.allclose(
+                batch_emb[i], single_emb[0], atol=1e-5
+            )
 
 
 class TestEmbeddingDistance:
@@ -88,6 +92,10 @@ class TestEmbeddingDistance:
         """Test that same embeddings have zero distance."""
         from src.models.embeddings import euclidean_distance
 
-        distance = euclidean_distance(sample_embeddings, sample_embeddings)
+        distance = euclidean_distance(
+            sample_embeddings, sample_embeddings
+        )
 
-        np.testing.assert_array_almost_equal(distance.detach().numpy(), np.zeros(8), decimal=5)
+        np.testing.assert_array_almost_equal(
+            distance.detach().numpy(), np.zeros(8), decimal=5
+        )

@@ -124,11 +124,15 @@ class TestConfusionMatrix:
         from src.training.metrics import confusion_matrix
 
         labels = torch.tensor([0, 0, 0])
-        predictions = torch.tensor([1, 1, 1])  # All misclassified as class 1
+        predictions = torch.tensor(
+            [1, 1, 1]
+        )  # All misclassified as class 1
 
         cm = confusion_matrix(predictions, labels, num_classes=3)
 
-        assert cm[0, 1] == 3  # 3 samples of class 0 predicted as class 1
+        assert (
+            cm[0, 1] == 3
+        )  # 3 samples of class 0 predicted as class 1
         assert cm[0, 0] == 0
 
 
@@ -142,7 +146,9 @@ class TestCosineSimilarityMetric:
         emb = torch.randn(4, 128)
 
         similarity = cosine_similarity_metric(emb, emb)
-        np.testing.assert_array_almost_equal(similarity.numpy(), np.ones(4), decimal=5)
+        np.testing.assert_array_almost_equal(
+            similarity.numpy(), np.ones(4), decimal=5
+        )
 
     def test_orthogonal_embeddings(self):
         """Test similarity of orthogonal embeddings."""
@@ -175,7 +181,9 @@ class TestPrecisionRecall:
         predictions = torch.tensor([0, 0, 0, 1, 1])
         labels = torch.tensor([0, 0, 1, 1, 1])
 
-        precision = precision_per_class(predictions, labels, num_classes=2)
+        precision = precision_per_class(
+            predictions, labels, num_classes=2
+        )
 
         # Class 0: 2 correct out of 3 predicted = 2/3
         # Class 1: 2 correct out of 2 predicted = 1.0

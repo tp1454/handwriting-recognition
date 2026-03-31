@@ -67,8 +67,15 @@ class TestConfigDataclass:
 
         data = {
             "model": {"num_classes": 62, "embedding_dim": 128},
-            "training": {"epochs": 10, "batch_size": 32, "learning_rate": 0.001},
-            "data": {"train_path": "data/train", "val_path": "data/val"},
+            "training": {
+                "epochs": 10,
+                "batch_size": 32,
+                "learning_rate": 0.001,
+            },
+            "data": {
+                "train_path": "data/train",
+                "val_path": "data/val",
+            },
         }
 
         config = Config.from_dict(data)

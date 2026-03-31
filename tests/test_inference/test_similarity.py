@@ -18,12 +18,16 @@ class TestSimilarityScoring:
         """Test that similarity returns a score."""
         from src.inference.similarity import compute_similarity
 
-        with patch("src.inference.similarity.get_encoder") as mock_get_encoder:
+        with patch(
+            "src.inference.similarity.get_encoder"
+        ) as mock_get_encoder:
             mock_encoder = Mock()
             mock_encoder.return_value = torch.randn(1, 128)
             mock_get_encoder.return_value = mock_encoder
 
-            score = compute_similarity(sample_single_image, sample_single_image)
+            score = compute_similarity(
+                sample_single_image, sample_single_image
+            )
 
             assert isinstance(score, float)
 
@@ -31,35 +35,49 @@ class TestSimilarityScoring:
         """Test that similarity is in valid range [0, 100]."""
         from src.inference.similarity import compute_similarity
 
-        with patch("src.inference.similarity.get_encoder") as mock_get_encoder:
+        with patch(
+            "src.inference.similarity.get_encoder"
+        ) as mock_get_encoder:
             mock_encoder = Mock()
             mock_encoder.return_value = torch.randn(1, 128)
             mock_get_encoder.return_value = mock_encoder
 
-            score = compute_similarity(sample_single_image, sample_single_image)
+            score = compute_similarity(
+                sample_single_image, sample_single_image
+            )
 
             assert 0.0 <= score <= 100.0
 
-    def test_identical_images_high_similarity(self, sample_single_image):
+    def test_identical_images_high_similarity(
+        self, sample_single_image
+    ):
         """Test that identical images have high similarity."""
         from src.inference.similarity import compute_similarity
 
-        with patch("src.inference.similarity.get_encoder") as mock_get_encoder:
+        with patch(
+            "src.inference.similarity.get_encoder"
+        ) as mock_get_encoder:
             mock_encoder = Mock()
             # Return same embedding for both
             embedding = torch.randn(1, 128)
             mock_encoder.return_value = embedding
             mock_get_encoder.return_value = mock_encoder
 
-            score = compute_similarity(sample_single_image, sample_single_image)
+            score = compute_similarity(
+                sample_single_image, sample_single_image
+            )
 
             assert score > 90.0
 
-    def test_different_images_lower_similarity(self, sample_single_image):
+    def test_different_images_lower_similarity(
+        self, sample_single_image
+    ):
         """Test that different images have lower similarity."""
         from src.inference.similarity import compute_similarity
 
-        with patch("src.inference.similarity.get_encoder") as mock_get_encoder:
+        with patch(
+            "src.inference.similarity.get_encoder"
+        ) as mock_get_encoder:
             mock_encoder = Mock()
             # Return different embeddings
             call_count = [0]
@@ -75,7 +93,9 @@ class TestSimilarityScoring:
             mock_get_encoder.return_value = mock_encoder
 
             other_image = torch.randn_like(sample_single_image)
-            score = compute_similarity(sample_single_image, other_image)
+            score = compute_similarity(
+                sample_single_image, other_image
+            )
 
             assert score < 50.0
 
@@ -87,24 +107,36 @@ class TestReferenceComparison:
         """Test comparison against a reference image."""
         from src.inference.similarity import compare_to_reference
 
-        with patch("src.inference.similarity.get_encoder") as mock_get_encoder:
-            with patch("src.inference.similarity.load_reference") as mock_load_ref:
+        with patch(
+            "src.inference.similarity.get_encoder"
+        ) as mock_get_encoder:
+            with patch(
+                "src.inference.similarity.load_reference"
+            ) as mock_load_ref:
                 mock_encoder = Mock()
                 mock_encoder.return_value = torch.randn(1, 128)
                 mock_get_encoder.return_value = mock_encoder
                 mock_load_ref.return_value = torch.randn(1, 1, 28, 28)
 
-                result = compare_to_reference(sample_single_image, reference_id="A_standard")
+                result = compare_to_reference(
+                    sample_single_image, reference_id="A_standard"
+                )
 
                 assert "similarity" in result
                 assert "reference_id" in result
 
-    def test_compare_to_multiple_references(self, sample_single_image):
+    def test_compare_to_multiple_references(
+        self, sample_single_image
+    ):
         """Test comparison against multiple references."""
         from src.inference.similarity import compare_to_references
 
-        with patch("src.inference.similarity.get_encoder") as mock_get_encoder:
-            with patch("src.inference.similarity.load_references") as mock_load_refs:
+        with patch(
+            "src.inference.similarity.get_encoder"
+        ) as mock_get_encoder:
+            with patch(
+                "src.inference.similarity.load_references"
+            ) as mock_load_refs:
                 mock_encoder = Mock()
                 mock_encoder.return_value = torch.randn(1, 128)
                 mock_get_encoder.return_value = mock_encoder
@@ -113,7 +145,9 @@ class TestReferenceComparison:
                     "A_cursive": torch.randn(1, 1, 28, 28),
                 }
 
-                results = compare_to_references(sample_single_image, character="A")
+                results = compare_to_references(
+                    sample_single_image, character="A"
+                )
 
                 assert len(results) >= 1
 
@@ -121,8 +155,12 @@ class TestReferenceComparison:
         """Test that best matching reference is identified."""
         from src.inference.similarity import find_best_match
 
-        with patch("src.inference.similarity.get_encoder") as mock_get_encoder:
-            with patch("src.inference.similarity.load_references") as mock_load_refs:
+        with patch(
+            "src.inference.similarity.get_encoder"
+        ) as mock_get_encoder:
+            with patch(
+                "src.inference.similarity.load_references"
+            ) as mock_load_refs:
                 mock_encoder = Mock()
                 mock_encoder.return_value = torch.randn(1, 128)
                 mock_get_encoder.return_value = mock_encoder
@@ -131,7 +169,9 @@ class TestReferenceComparison:
                     "A_2": torch.randn(1, 1, 28, 28),
                 }
 
-                best_match = find_best_match(sample_single_image, character="A")
+                best_match = find_best_match(
+                    sample_single_image, character="A"
+                )
 
                 assert "reference_id" in best_match
                 assert "similarity" in best_match
@@ -144,7 +184,9 @@ class TestEmbeddingExtraction:
         """Test that embeddings have correct shape."""
         from src.inference.similarity import extract_embedding
 
-        with patch("src.inference.similarity.get_encoder") as mock_get_encoder:
+        with patch(
+            "src.inference.similarity.get_encoder"
+        ) as mock_get_encoder:
             mock_encoder = Mock()
             mock_encoder.return_value = torch.randn(1, 128)
             mock_get_encoder.return_value = mock_encoder
@@ -157,7 +199,9 @@ class TestEmbeddingExtraction:
         """Test that embeddings are L2 normalized."""
         from src.inference.similarity import extract_embedding
 
-        with patch("src.inference.similarity.get_encoder") as mock_get_encoder:
+        with patch(
+            "src.inference.similarity.get_encoder"
+        ) as mock_get_encoder:
             mock_encoder = Mock()
             # Return normalized embedding
             emb = torch.randn(1, 128)
@@ -165,7 +209,9 @@ class TestEmbeddingExtraction:
             mock_encoder.return_value = emb
             mock_get_encoder.return_value = mock_encoder
 
-            embedding = extract_embedding(sample_single_image, normalize=True)
+            embedding = extract_embedding(
+                sample_single_image, normalize=True
+            )
             norm = torch.norm(embedding).item()
 
             assert norm == pytest.approx(1.0, abs=0.01)
@@ -192,4 +238,6 @@ class TestSimilarityMetrics:
         emb2 = torch.tensor([[0.0, 0.0]])
 
         sim = euclidean_to_similarity(emb1, emb2)
-        assert sim == pytest.approx(100.0)  # Zero distance = 100% similarity
+        assert sim == pytest.approx(
+            100.0
+        )  # Zero distance = 100% similarity

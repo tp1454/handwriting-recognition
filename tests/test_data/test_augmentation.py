@@ -24,9 +24,14 @@ class TestRotationAugmentation:
         from src.data.augmentation import random_rotation
 
         # Multiple rotations should produce different results
-        results = [random_rotation(sample_single_image, max_angle=15) for _ in range(10)]
+        results = [
+            random_rotation(sample_single_image, max_angle=15)
+            for _ in range(10)
+        ]
         # Check that we get some variation (not all identical)
-        assert not all(torch.allclose(results[0], r) for r in results[1:])
+        assert not all(
+            torch.allclose(results[0], r) for r in results[1:]
+        )
 
 
 class TestScaleAugmentation:

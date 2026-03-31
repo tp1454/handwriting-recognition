@@ -30,7 +30,9 @@ class TestClassifyEndpoint:
 
             client = TestClient(app)
 
-            response = client.post("/classify", json={"image": mock_image_base64})
+            response = client.post(
+                "/classify", json={"image": mock_image_base64}
+            )
 
             assert response.status_code == 200
 
@@ -48,7 +50,9 @@ class TestClassifyEndpoint:
 
             client = TestClient(app)
 
-            response = client.post("/classify", json={"image": mock_image_base64})
+            response = client.post(
+                "/classify", json={"image": mock_image_base64}
+            )
             data = response.json()
 
             assert "character" in data
@@ -69,7 +73,9 @@ class TestClassifyEndpoint:
 
             client = TestClient(app)
 
-            response = client.post("/classify", json={"image": mock_image_base64})
+            response = client.post(
+                "/classify", json={"image": mock_image_base64}
+            )
             data = response.json()
 
             assert "confidence" in data
@@ -86,7 +92,9 @@ class TestClassifyEndpoint:
 
             client = TestClient(app)
 
-            response = client.post("/classify", json={"image": invalid_base64})
+            response = client.post(
+                "/classify", json={"image": invalid_base64}
+            )
 
             assert response.status_code == 422
 
@@ -113,7 +121,9 @@ class TestSimilarityEndpoint:
         """Test successful similarity returns 200."""
         from fastapi.testclient import TestClient
 
-        with patch("api.dependencies.get_encoder") as mock_get_encoder:
+        with patch(
+            "api.dependencies.get_encoder"
+        ) as mock_get_encoder:
             mock_encoder = Mock()
             mock_encoder.return_value = torch.randn(1, 128)
             mock_get_encoder.return_value = mock_encoder
@@ -123,7 +133,11 @@ class TestSimilarityEndpoint:
             client = TestClient(app)
 
             response = client.post(
-                "/similarity", json={"image1": mock_image_base64, "image2": mock_image_base64}
+                "/similarity",
+                json={
+                    "image1": mock_image_base64,
+                    "image2": mock_image_base64,
+                },
             )
 
             assert response.status_code == 200
@@ -132,7 +146,9 @@ class TestSimilarityEndpoint:
         """Test that response includes similarity score."""
         from fastapi.testclient import TestClient
 
-        with patch("api.dependencies.get_encoder") as mock_get_encoder:
+        with patch(
+            "api.dependencies.get_encoder"
+        ) as mock_get_encoder:
             mock_encoder = Mock()
             mock_encoder.return_value = torch.randn(1, 128)
             mock_get_encoder.return_value = mock_encoder
@@ -142,7 +158,11 @@ class TestSimilarityEndpoint:
             client = TestClient(app)
 
             response = client.post(
-                "/similarity", json={"image1": mock_image_base64, "image2": mock_image_base64}
+                "/similarity",
+                json={
+                    "image1": mock_image_base64,
+                    "image2": mock_image_base64,
+                },
             )
             data = response.json()
 
@@ -226,7 +246,9 @@ class TestAnalyzeEndpoint:
         from fastapi.testclient import TestClient
 
         with patch("api.dependencies.get_model") as mock_get_model:
-            with patch("api.dependencies.get_encoder") as mock_get_encoder:
+            with patch(
+                "api.dependencies.get_encoder"
+            ) as mock_get_encoder:
                 mock_model = Mock()
                 mock_model.return_value = torch.randn(1, 62)
                 mock_model.eval = Mock()
@@ -240,7 +262,9 @@ class TestAnalyzeEndpoint:
 
                 client = TestClient(app)
 
-                response = client.post("/analyze", json={"image": mock_image_base64})
+                response = client.post(
+                    "/analyze", json={"image": mock_image_base64}
+                )
 
                 assert response.status_code == 200
 
@@ -249,7 +273,9 @@ class TestAnalyzeEndpoint:
         from fastapi.testclient import TestClient
 
         with patch("api.dependencies.get_model") as mock_get_model:
-            with patch("api.dependencies.get_encoder") as mock_get_encoder:
+            with patch(
+                "api.dependencies.get_encoder"
+            ) as mock_get_encoder:
                 mock_model = Mock()
                 mock_model.return_value = torch.randn(1, 62)
                 mock_model.eval = Mock()
@@ -263,7 +289,9 @@ class TestAnalyzeEndpoint:
 
                 client = TestClient(app)
 
-                response = client.post("/analyze", json={"image": mock_image_base64})
+                response = client.post(
+                    "/analyze", json={"image": mock_image_base64}
+                )
                 data = response.json()
 
                 assert "character" in data
@@ -298,7 +326,9 @@ class TestRateLimiting:
     """Tests for rate limiting (if implemented)."""
 
     @pytest.mark.slow
-    def test_rate_limit_not_exceeded_normal_use(self, mock_image_base64):
+    def test_rate_limit_not_exceeded_normal_use(
+        self, mock_image_base64
+    ):
         """Test that normal use doesn't exceed rate limit."""
         from fastapi.testclient import TestClient
 
@@ -314,5 +344,7 @@ class TestRateLimiting:
 
             # Make a few requests
             for _ in range(5):
-                response = client.post("/classify", json={"image": mock_image_base64})
+                response = client.post(
+                    "/classify", json={"image": mock_image_base64}
+                )
                 assert response.status_code == 200

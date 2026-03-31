@@ -89,7 +89,9 @@ class TestDataLoaderBatching:
 
     def test_drop_last(self, mock_dataset):
         """Test drop_last parameter."""
-        loader = DataLoader(mock_dataset, batch_size=8, drop_last=True)
+        loader = DataLoader(
+            mock_dataset, batch_size=8, drop_last=True
+        )
         for batch in loader:
             images, _ = batch
             assert images.shape[0] == 8

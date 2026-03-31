@@ -21,8 +21,12 @@ class TestInferencePipeline:
         """Test pipeline initializes correctly."""
         from src.inference.pipeline import InferencePipeline
 
-        with patch("src.inference.pipeline.load_classifier") as mock_load_cls:
-            with patch("src.inference.pipeline.load_encoder") as mock_load_enc:
+        with patch(
+            "src.inference.pipeline.load_classifier"
+        ) as mock_load_cls:
+            with patch(
+                "src.inference.pipeline.load_encoder"
+            ) as mock_load_enc:
                 mock_load_cls.return_value = Mock()
                 mock_load_enc.return_value = Mock()
 
@@ -34,8 +38,12 @@ class TestInferencePipeline:
         """Test classification through pipeline."""
         from src.inference.pipeline import InferencePipeline
 
-        with patch("src.inference.pipeline.load_classifier") as mock_load_cls:
-            with patch("src.inference.pipeline.load_encoder") as mock_load_enc:
+        with patch(
+            "src.inference.pipeline.load_classifier"
+        ) as mock_load_cls:
+            with patch(
+                "src.inference.pipeline.load_encoder"
+            ) as mock_load_enc:
                 mock_classifier = Mock()
                 mock_classifier.return_value = torch.randn(1, 62)
                 mock_classifier.eval = Mock()
@@ -52,15 +60,21 @@ class TestInferencePipeline:
         """Test similarity scoring through pipeline."""
         from src.inference.pipeline import InferencePipeline
 
-        with patch("src.inference.pipeline.load_classifier") as mock_load_cls:
-            with patch("src.inference.pipeline.load_encoder") as mock_load_enc:
+        with patch(
+            "src.inference.pipeline.load_classifier"
+        ) as mock_load_cls:
+            with patch(
+                "src.inference.pipeline.load_encoder"
+            ) as mock_load_enc:
                 mock_encoder = Mock()
                 mock_encoder.return_value = torch.randn(1, 128)
                 mock_load_cls.return_value = Mock()
                 mock_load_enc.return_value = mock_encoder
 
                 pipeline = InferencePipeline()
-                result = pipeline.compute_similarity(sample_image_28x28, sample_image_28x28)
+                result = pipeline.compute_similarity(
+                    sample_image_28x28, sample_image_28x28
+                )
 
                 assert isinstance(result, float)
 
@@ -68,9 +82,15 @@ class TestInferencePipeline:
         """Test full analysis (classify + similarity)."""
         from src.inference.pipeline import InferencePipeline
 
-        with patch("src.inference.pipeline.load_classifier") as mock_load_cls:
-            with patch("src.inference.pipeline.load_encoder") as mock_load_enc:
-                with patch("src.inference.pipeline.load_reference") as mock_load_ref:
+        with patch(
+            "src.inference.pipeline.load_classifier"
+        ) as mock_load_cls:
+            with patch(
+                "src.inference.pipeline.load_encoder"
+            ) as mock_load_enc:
+                with patch(
+                    "src.inference.pipeline.load_reference"
+                ) as mock_load_ref:
                     mock_classifier = Mock()
                     mock_classifier.return_value = torch.randn(1, 62)
                     mock_classifier.eval = Mock()
@@ -80,7 +100,9 @@ class TestInferencePipeline:
                     mock_encoder.return_value = torch.randn(1, 128)
                     mock_load_enc.return_value = mock_encoder
 
-                    mock_load_ref.return_value = torch.randn(1, 1, 28, 28)
+                    mock_load_ref.return_value = torch.randn(
+                        1, 1, 28, 28
+                    )
 
                     pipeline = InferencePipeline()
                     result = pipeline.analyze(sample_image_28x28)
@@ -100,7 +122,9 @@ class TestBase64ImageHandling:
         image = decode_base64_image(mock_image_base64)
 
         assert image is not None
-        assert isinstance(image, (Image.Image, np.ndarray, torch.Tensor))
+        assert isinstance(
+            image, (Image.Image, np.ndarray, torch.Tensor)
+        )
 
     def test_decode_invalid_base64(self, invalid_base64):
         """Test error on invalid base64."""
@@ -113,8 +137,12 @@ class TestBase64ImageHandling:
         """Test pipeline accepts base64 input."""
         from src.inference.pipeline import InferencePipeline
 
-        with patch("src.inference.pipeline.load_classifier") as mock_load_cls:
-            with patch("src.inference.pipeline.load_encoder") as mock_load_enc:
+        with patch(
+            "src.inference.pipeline.load_classifier"
+        ) as mock_load_cls:
+            with patch(
+                "src.inference.pipeline.load_encoder"
+            ) as mock_load_enc:
                 mock_classifier = Mock()
                 mock_classifier.return_value = torch.randn(1, 62)
                 mock_classifier.eval = Mock()
@@ -134,27 +162,41 @@ class TestPipelinePreprocessing:
         """Test that preprocessing is applied to inputs."""
         from src.inference.pipeline import InferencePipeline
 
-        with patch("src.inference.pipeline.load_classifier") as mock_load_cls:
-            with patch("src.inference.pipeline.load_encoder") as mock_load_enc:
-                with patch("src.inference.pipeline.preprocess") as mock_preprocess:
+        with patch(
+            "src.inference.pipeline.load_classifier"
+        ) as mock_load_cls:
+            with patch(
+                "src.inference.pipeline.load_encoder"
+            ) as mock_load_enc:
+                with patch(
+                    "src.inference.pipeline.preprocess"
+                ) as mock_preprocess:
                     mock_classifier = Mock()
                     mock_classifier.return_value = torch.randn(1, 62)
                     mock_classifier.eval = Mock()
                     mock_load_cls.return_value = mock_classifier
                     mock_load_enc.return_value = Mock()
-                    mock_preprocess.return_value = torch.randn(1, 1, 28, 28)
+                    mock_preprocess.return_value = torch.randn(
+                        1, 1, 28, 28
+                    )
 
                     pipeline = InferencePipeline()
                     pipeline.classify(sample_image_rgb)
 
                     mock_preprocess.assert_called()
 
-    def test_already_tensor_minimal_preprocessing(self, sample_single_image):
+    def test_already_tensor_minimal_preprocessing(
+        self, sample_single_image
+    ):
         """Test that tensors require minimal preprocessing."""
         from src.inference.pipeline import InferencePipeline
 
-        with patch("src.inference.pipeline.load_classifier") as mock_load_cls:
-            with patch("src.inference.pipeline.load_encoder") as mock_load_enc:
+        with patch(
+            "src.inference.pipeline.load_classifier"
+        ) as mock_load_cls:
+            with patch(
+                "src.inference.pipeline.load_encoder"
+            ) as mock_load_enc:
                 mock_classifier = Mock()
                 mock_classifier.return_value = torch.randn(1, 62)
                 mock_classifier.eval = Mock()
@@ -174,8 +216,12 @@ class TestPipelineBatchProcessing:
         """Test batch classification."""
         from src.inference.pipeline import InferencePipeline
 
-        with patch("src.inference.pipeline.load_classifier") as mock_load_cls:
-            with patch("src.inference.pipeline.load_encoder") as mock_load_enc:
+        with patch(
+            "src.inference.pipeline.load_classifier"
+        ) as mock_load_cls:
+            with patch(
+                "src.inference.pipeline.load_encoder"
+            ) as mock_load_enc:
                 mock_classifier = Mock()
                 mock_classifier.return_value = torch.randn(8, 62)
                 mock_classifier.eval = Mock()
@@ -191,8 +237,12 @@ class TestPipelineBatchProcessing:
         """Test that batch results maintain input order."""
         from src.inference.pipeline import InferencePipeline
 
-        with patch("src.inference.pipeline.load_classifier") as mock_load_cls:
-            with patch("src.inference.pipeline.load_encoder") as mock_load_enc:
+        with patch(
+            "src.inference.pipeline.load_classifier"
+        ) as mock_load_cls:
+            with patch(
+                "src.inference.pipeline.load_encoder"
+            ) as mock_load_enc:
                 mock_classifier = Mock()
                 # Create predictable output
                 logits = torch.zeros(8, 62)
@@ -220,8 +270,12 @@ class TestPipelineIntegration:
 
         # This would use real models in integration test
         # For unit test, we mock
-        with patch("src.inference.pipeline.load_classifier") as mock_load_cls:
-            with patch("src.inference.pipeline.load_encoder") as mock_load_enc:
+        with patch(
+            "src.inference.pipeline.load_classifier"
+        ) as mock_load_cls:
+            with patch(
+                "src.inference.pipeline.load_encoder"
+            ) as mock_load_enc:
                 mock_classifier = Mock()
                 mock_classifier.return_value = torch.randn(1, 62)
                 mock_classifier.eval = Mock()

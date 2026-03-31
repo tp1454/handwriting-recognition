@@ -79,7 +79,9 @@ class TestSimilarityRequest:
         """Test valid similarity request."""
         from api.schemas import SimilarityRequest
 
-        request = SimilarityRequest(image1=mock_image_base64, image2=mock_image_base64)
+        request = SimilarityRequest(
+            image1=mock_image_base64, image2=mock_image_base64
+        )
         assert request.image1 == mock_image_base64
         assert request.image2 == mock_image_base64
 
@@ -106,7 +108,10 @@ class TestSimilarityResponse:
         from api.schemas import SimilarityResponse
 
         response = SimilarityResponse(
-            character="A", confidence=0.95, similarity=85.5, reference_id="A_standard"
+            character="A",
+            confidence=0.95,
+            similarity=85.5,
+            reference_id="A_standard",
         )
         assert response.similarity == 85.5
 
@@ -116,12 +121,18 @@ class TestSimilarityResponse:
 
         # Valid range
         response = SimilarityResponse(
-            character="A", confidence=0.95, similarity=0.0, reference_id="A_standard"
+            character="A",
+            confidence=0.95,
+            similarity=0.0,
+            reference_id="A_standard",
         )
         assert response.similarity == 0.0
 
         response = SimilarityResponse(
-            character="A", confidence=0.95, similarity=100.0, reference_id="A_standard"
+            character="A",
+            confidence=0.95,
+            similarity=100.0,
+            reference_id="A_standard",
         )
         assert response.similarity == 100.0
 
@@ -145,7 +156,9 @@ class TestAnalyzeRequest:
         assert request.reference_id is None
 
         # With reference_id
-        request = AnalyzeRequest(image=mock_image_base64, reference_id="A_standard")
+        request = AnalyzeRequest(
+            image=mock_image_base64, reference_id="A_standard"
+        )
         assert request.reference_id == "A_standard"
 
 
