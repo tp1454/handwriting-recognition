@@ -71,17 +71,17 @@ inference:
 
   # EasyOCR detect defaults
   easyocr_detect:
-    min_size: 10
-    text_threshold: 0.7
-    low_text: 0.4
-    link_threshold: 0.4
+    min_size: 3  # smaller chars
+    text_threshold: 0.4  # slightly lower
+    low_text: 0.05  # detect faint chars
+    link_threshold: 0.1  # VERY IMPORTANT: reduce linking
     canvas_size: 2560
-    mag_ratio: 1.0
-    slope_ths: 0.1
-    ycenter_ths: 0.5
-    height_ths: 0.5
-    width_ths: 0.5
-    add_margin: 0.1
+    mag_ratio: 3.0  # zoom in more
+    slope_ths: 0.1  # stricter alignment
+    ycenter_ths: 0.3  # reduce row merging
+    height_ths: 0.3  # reduce grouping
+    width_ths: 0.3  # reduce grouping
+    add_margin: 0.05
     optimal_num_chars: null
 
 # =============================================================================

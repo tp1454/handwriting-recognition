@@ -3,7 +3,7 @@
 from unittest.mock import Mock, patch
 
 import pytest
-from src.models.easyocr import EasyOCRDetector
+from src.data.processing import EasyOCRDetector
 
 
 class TestEasyOCRDetector:

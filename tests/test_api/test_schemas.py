@@ -191,3 +191,82 @@ class TestTopKResponse:
 
         confidences = [p.confidence for p in response.predictions]
         assert confidences == sorted(confidences, reverse=True)
+
+
+class TestSheetRowScore:
+    """Tests for sheet row score schema semantics."""
+
+    def test_allows_empty_segment_scores(self):
+        """Rows without non-reference comparisons should allow empty score lists."""
+        from api.schemas import SheetRowScore
+
+        row = SheetRowScore(
+            row_index=0,
+            source_box=[0, 4, 0, 8],
+            ocr_label="A",
+            split_count=1,
+            was_split=False,
+            segment_scores=[],
+            row_score=100.0,
+        )
+
+        assert row.segment_scores == []
+
+    def test_rejects_out_of_range_segment_scores(self):
+        """Comparison scores must remain bounded to [0, 100]."""
+        from api.schemas import SheetRowScore
+
+        with pytest.raises(ValidationError):
+            SheetRowScore(
+                row_index=0,
+                source_box=[0, 4, 0, 8],
+                ocr_label="A",
+                split_count=2,
+                was_split=True,
+                segment_scores=[101.0],
+                row_score=90.0,
+            )
+
+    def test_rejects_empty_ocr_label(self):
+        """Each row must contain a non-empty OCR label."""
+        from api.schemas import SheetRowScore
+
+        with pytest.raises(ValidationError):
+            SheetRowScore(
+                row_index=0,
+                source_box=[0, 4, 0, 8],
+                ocr_label="  ",
+                split_count=1,
+                was_split=False,
+                segment_scores=[],
+                row_score=100.0,
+            )
+
+
+class TestExtractedBox:
+    """Tests for extracted OCR box schema."""
+
+    def test_valid_extracted_box(self):
+        """Well-formed extracted box payload should validate."""
+        from api.schemas import ExtractedBox
+
+        box = ExtractedBox(
+            index=0,
+            box=[1, 3, 2, 6],
+            label="A",
+            confidence=0.9,
+        )
+
+        assert box.label == "A"
+
+    def test_rejects_invalid_box_shape(self):
+        """Extracted box must contain exactly 4 coordinates."""
+        from api.schemas import ExtractedBox
+
+        with pytest.raises(ValidationError):
+            ExtractedBox(
+                index=0,
+                box=[1, 3, 2],
+                label="A",
+                confidence=0.9,
+            )

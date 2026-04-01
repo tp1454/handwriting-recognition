@@ -11,6 +11,7 @@ Pillow
 # API
 fastapi
 uvicorn
+python-multipart
 
 # Utilities
 pyyaml
