@@ -1,7 +1,7 @@
 # Makefile for Handwriting Recognition Project
 # Automates environment setup, dependency installation, testing, and deployment
 
-.PHONY: help check setup pre-commit-install quality clean clean-cache clean-reports clean-venv test test-coverage test-fast test-watch info
+.PHONY: help check setup pre-commit-install quality clean clean-cache clean-reports clean-venv test test-coverage test-fast test-watch run-api run-web docker-build docker-up docker-down docker-logs info
 
 # Default Python version
 PYTHON_VERSION := 3.12
@@ -219,6 +219,30 @@ test-fast: ## Run tests excluding slow tests
 test-watch: ## Run tests in watch mode
 	@echo "$(BLUE)Running tests in watch mode...$(NC)"
 	@$(PYTEST) tests/ -v --looponfail
+
+run-api: ## Run FastAPI server with uvicorn
+	@echo "$(BLUE)Starting FastAPI server on http://localhost:8000 ...$(NC)"
+	@$(BIN)/uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
+
+run-web: ## Serve static web frontend on http://localhost:5173
+	@echo "$(BLUE)Serving web frontend on http://localhost:5173 ...$(NC)"
+	@cd web && python3 -m http.server 5173
+
+docker-build: ## Build Docker images for API and web
+	@echo "$(BLUE)Building Docker images...$(NC)"
+	@docker compose build
+
+docker-up: ## Start API and web containers in detached mode
+	@echo "$(BLUE)Starting Docker services (api + web)...$(NC)"
+	@docker compose up -d
+
+docker-down: ## Stop and remove Docker services
+	@echo "$(BLUE)Stopping Docker services...$(NC)"
+	@docker compose down
+
+docker-logs: ## Stream logs from all Docker services
+	@echo "$(BLUE)Streaming Docker service logs...$(NC)"
+	@docker compose logs -f
 
 #=============================================================================
 # Cleanup
