@@ -1,7 +1,7 @@
 # Makefile for Handwriting Recognition Project
 # Automates environment setup, dependency installation, testing, and deployment
 
-.PHONY: help check setup pre-commit-install quality clean clean-cache clean-reports clean-venv test test-coverage test-fast test-watch info
+.PHONY: help check setup pre-commit-install quality clean clean-cache clean-reports clean-venv test test-coverage test-fast test-watch run-api run-web docker-build docker-up docker-down docker-logs info
 
 # Default Python version
 PYTHON_VERSION := 3.12
@@ -88,12 +88,41 @@ ifeq ($(OS),Windows_NT)
 	fi
 	@echo "$(GREEN)✓ Python $(PYTHON_VERSION_FUZZY).x found via: $(PYTHON_CMD)$(NC)"
 else
-	@if [ -z "$(PYTHON_CMD)" ]; then \
+	@resolved_python="$(PYTHON_CMD)"; \
+	python_source="default"; \
+	if command -v pyenv >/dev/null 2>&1; then \
+		pyenv_available=1; \
+	else \
+		pyenv_available=0; \
+	fi; \
+	if [ -t 0 ] && [ -t 1 ]; then \
+		if [ "$$pyenv_available" -eq 1 ]; then \
+			printf "$(YELLOW)Use pyenv-managed Python for this run? [Y/n]: $(NC)"; \
+			read -r use_pyenv; \
+			case "$$use_pyenv" in \
+				n|N|no|NO) ;; \
+				*) python_source="pyenv"; resolved_python="pyenv exec python" ;; \
+			esac; \
+		else \
+			echo "$(YELLOW)pyenv not found. Using default Python discovery.$(NC)"; \
+		fi; \
+	elif [ "$$pyenv_available" -eq 1 ]; then \
+		python_source="pyenv"; \
+		resolved_python="pyenv exec python"; \
+	fi; \
+	if ! ( [ -n "$$resolved_python" ] && $$resolved_python --version >/dev/null 2>&1 ); then \
+		if [ "$$python_source" = "pyenv" ]; then \
+			echo "$(YELLOW)pyenv Python is unavailable. Falling back to default Python discovery.$(NC)"; \
+			resolved_python="$(PYTHON_CMD)"; \
+			python_source="default"; \
+		fi; \
+	fi; \
+	if ! ( [ -n "$$resolved_python" ] && $$resolved_python --version >/dev/null 2>&1 ); then \
 		echo "$(RED)✗ Python $(PYTHON_VERSION_FUZZY).x is not installed or not found$(NC)"; \
 		echo "$(YELLOW)  Please install Python $(PYTHON_VERSION_FUZZY).x and ensure it is in PATH$(NC)"; \
 		exit 1; \
 	else \
-		echo "$(GREEN)✓ Python found at: $(PYTHON_CMD)$(NC)"; \
+		echo "$(GREEN)✓ Python found via $$python_source: $$resolved_python$(NC)"; \
 	fi
 endif
 	@echo ""
@@ -111,8 +140,43 @@ ifeq ($(OS),Windows_NT)
 		echo "$(BLUE)Virtual environment already exists at $(VENV)$(NC)"; \
 	fi
 else
-	@if [ ! -d "$(VENV)" ]; then \
-		$(PYTHON_CMD) -m venv $(VENV); \
+	@resolved_python="$(PYTHON_CMD)"; \
+	python_source="default"; \
+	if command -v pyenv >/dev/null 2>&1; then \
+		pyenv_available=1; \
+	else \
+		pyenv_available=0; \
+	fi; \
+	if [ -t 0 ] && [ -t 1 ]; then \
+		if [ "$$pyenv_available" -eq 1 ]; then \
+			printf "$(YELLOW)Use pyenv-managed Python for this run? [Y/n]: $(NC)"; \
+			read -r use_pyenv; \
+			case "$$use_pyenv" in \
+				n|N|no|NO) ;; \
+				*) python_source="pyenv"; resolved_python="pyenv exec python" ;; \
+			esac; \
+		else \
+			echo "$(YELLOW)pyenv not found. Using default Python discovery.$(NC)"; \
+		fi; \
+	elif [ "$$pyenv_available" -eq 1 ]; then \
+		python_source="pyenv"; \
+		resolved_python="pyenv exec python"; \
+	fi; \
+	if ! ( [ -n "$$resolved_python" ] && $$resolved_python --version >/dev/null 2>&1 ); then \
+		if [ "$$python_source" = "pyenv" ]; then \
+			echo "$(YELLOW)pyenv Python is unavailable. Falling back to default Python discovery.$(NC)"; \
+			resolved_python="$(PYTHON_CMD)"; \
+			python_source="default"; \
+		fi; \
+	fi; \
+	if ! ( [ -n "$$resolved_python" ] && $$resolved_python --version >/dev/null 2>&1 ); then \
+		echo "$(RED)✗ Python $(PYTHON_VERSION_FUZZY).x is not installed or not found$(NC)"; \
+		echo "$(YELLOW)  Please install Python $(PYTHON_VERSION_FUZZY).x and ensure it is in PATH$(NC)"; \
+		exit 1; \
+	fi; \
+	echo "$(GREEN)Using $$python_source Python for setup: $$resolved_python$(NC)"; \
+	if [ ! -d "$(VENV)" ]; then \
+		$$resolved_python -m venv $(VENV); \
 		echo "$(GREEN)Virtual environment created at $(VENV)$(NC)"; \
 	else \
 		echo "$(BLUE)Virtual environment already exists at $(VENV)$(NC)"; \
@@ -164,6 +228,30 @@ test-fast: ## Run tests excluding slow tests
 test-watch: ## Run tests in watch mode
 	@echo "$(BLUE)Running tests in watch mode...$(NC)"
 	@$(PYTEST) tests/ -v --looponfail
+
+run-api: ## Run FastAPI server with uvicorn
+	@echo "$(BLUE)Starting FastAPI server on http://localhost:8000 ...$(NC)"
+	@$(BIN)/uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
+
+run-web: ## Serve static web frontend on http://localhost:5173
+	@echo "$(BLUE)Serving web frontend on http://localhost:5173 ...$(NC)"
+	@cd web && python3 -m http.server 5173
+
+docker-build: ## Build Docker images for API and web
+	@echo "$(BLUE)Building Docker images...$(NC)"
+	@docker compose build
+
+docker-up: ## Start API and web containers in detached mode
+	@echo "$(BLUE)Starting Docker services (api + web)...$(NC)"
+	@docker compose up -d
+
+docker-down: ## Stop and remove Docker services
+	@echo "$(BLUE)Stopping Docker services...$(NC)"
+	@docker compose down
+
+docker-logs: ## Stream logs from all Docker services
+	@echo "$(BLUE)Streaming Docker service logs...$(NC)"
+	@docker compose logs -f
 
 #=============================================================================
 # Cleanup

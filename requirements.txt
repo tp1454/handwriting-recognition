@@ -17,6 +17,7 @@ pymupdf
 # API
 fastapi
 uvicorn
+python-multipart
 
 # Utilities
 pyyaml

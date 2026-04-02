@@ -1,0 +1,29 @@
+.git
+.gitignore
+.vscode
+.idea
+
+.venv
+venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache
+.mypy_cache
+.ipynb_checkpoints
+
+# Local reports and logs
+reports
+
+# Notebook sources are not required for runtime containers
+notebooks
+
+# Large datasets not needed in container builds
+data/raw
+data/processed
+
+# Local rules and temporary artifacts
+.rules
+htmlcov
+.coverage

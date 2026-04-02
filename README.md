@@ -61,6 +61,78 @@ handwriting-recognition/
 2. **Phase 2**: Extract embeddings (remove softmax)
 3. **Phase 3**: Train Siamese network for similarity
 
+## 🖥️ Run API + Web (Basic Scoring Flow)
+
+### 1. Start FastAPI backend
+
+```bash
+uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+### 2. Start separate web app
+
+```bash
+cd web
+python3 -m http.server 5173
+```
+
+### 3. Open browser
+
+- http://localhost:5173
+
+### Main endpoint for sheet scoring
+
+- `POST /sheet/score`
+- Form field `file`: image upload (png/jpg/webp)
+
+Response includes:
+- `overall_score` (0-100)
+- `detected_rows`: number of row groups detected from EasyOCR boxes
+- `extracted_boxes[]`: middle-step EasyOCR extraction output (`index`, `box`, `label`, `confidence`)
+- `rows[]` with mandatory `ocr_label`, plus `source_box`, `split_count`, `was_split`, `row_score`, and `segment_scores` (comparison-only scores vs split index 0)
+
+Notes:
+- `/sheet/score` requires EasyOCR initialization; if unavailable, the API returns `503 Service Unavailable`.
+- Web app always shows row `ocr_label` with row score; extracted box overlay can be toggled on/off in preview.
+
+## 🐳 Run With Docker (Dev)
+
+### 1. Build images
+
+```bash
+docker compose build
+```
+
+### 2. Start services
+
+```bash
+docker compose up -d
+```
+
+or with Makefile:
+
+```bash
+make docker-up
+```
+
+### 3. Open services
+
+- API docs: http://localhost:8000/docs
+- API health: http://localhost:8000/health
+- Web app: http://localhost:5173
+
+### 4. Stop services
+
+```bash
+docker compose down
+```
+
+or with Makefile:
+
+```bash
+make docker-down
+```
+
 ## 📝 TODO
 
 - [ ] Set up environment

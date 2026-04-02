@@ -1,0 +1,43 @@
+version: "3.9"
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: handwriting-api
+    command: uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
+    environment:
+      API_CORS_ORIGINS: http://localhost:5173,http://127.0.0.1:5173
+      EASYOCR_HOME: /root/.EasyOCR
+      PYTHONUNBUFFERED: "1"
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./:/app
+      - easyocr_cache:/root/.EasyOCR
+      - torch_cache:/root/.cache/torch
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    container_name: handwriting-web
+    command: python3 -m http.server 5173 --bind 0.0.0.0
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./web:/app
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  easyocr_cache:
+  torch_cache:
