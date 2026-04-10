@@ -2,6 +2,11 @@
 
 This frontend is a separate static app that calls the FastAPI backend.
 
+It supports two workflows:
+
+1. Score an uploaded handwriting sheet (`POST /sheet/score`)
+2. Create a new handwriting sheet with configurable layout (`GET /sheet/options`, `POST /sheet/create`)
+
 ## Run
 
 1. Start backend:
@@ -24,6 +29,12 @@ python3 -m http.server 5173
 ## Configure API URL
 
 Edit `web/config.js` and set `apiBaseUrl`.
+
+## Sheet Creation Notes
+
+- Server fonts are discovered from `sheet.fonts_dir` in `config/default.yaml`.
+- You can also upload a `.ttf` or `.otf` font directly from the web form.
+- Generated files are served by the API at `/sheet/files/{filename}`.
 
 ## Run With Docker
 

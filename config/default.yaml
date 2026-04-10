@@ -71,18 +71,30 @@ inference:
 
   # EasyOCR detect defaults
   easyocr_detect:
-    min_size: 3  # smaller chars
+    # Selected from reports/easyocr_best_params_vietnamese.json
+    # min_size: 10
+    # text_threshold: 0.7
+    # low_text: 0.4
+    # link_threshold: 0.4
+    # canvas_size: 2560
+    # mag_ratio: 1.0
+    # slope_ths: 0.1
+    # ycenter_ths: 0.5
+    # height_ths: 0.5
+    # width_ths: 0.5
+    # add_margin: 0.1
+    # optimal_num_chars: null
+    min_size: 3
     text_threshold: 0.4  # slightly lower
-    low_text: 0.05  # detect faint chars
+    low_text: 0.45 # detect faint chars
     link_threshold: 0.1  # VERY IMPORTANT: reduce linking
-    canvas_size: 2560
-    mag_ratio: 3.0  # zoom in more
+    canvas_size: 4000
+    mag_ratio: 5.0  # zoom in more
     slope_ths: 0.1  # stricter alignment
-    ycenter_ths: 0.3  # reduce row merging
-    height_ths: 0.3  # reduce grouping
-    width_ths: 0.3  # reduce grouping
+    ycenter_ths: 0.1  # reduce row merging
+    height_ths: 0.1  # reduce grouping
+    width_ths: 0.2 # reduce grouping
     add_margin: 0.05
-    optimal_num_chars: null
 
 # =============================================================================
 # API Configuration
@@ -99,12 +111,15 @@ api:
 sheet:
   font_name: "handwriting_sheet"
   save_path: "data/user_samples"
+  fonts_dir: "data/reference/fonts"
   en_filename: "english_sheet.pdf"
   vi_filename: "vietnamese_sheet.pdf"
+  default_language: "auto"
+  max_custom_text_length: 4000
 
   # Kích thước và khoảng cách
   font_size: 15
-  line_spacing: 20  # Đã tính toán từ (size + 5)
+  line_spacing: 30  # Đã tính toán từ (size + 5)
   word_spacing: 20
 
   # Kích thước giấy A4 (Point)
@@ -120,6 +135,7 @@ sheet:
   # Chia lưới
   divide_horizontal: 421
   divide_vertical: 297
+  show_vertical_line: false
 
   # Nội dung Tiếng Anh
   en_text: |

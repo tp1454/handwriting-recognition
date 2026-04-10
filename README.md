@@ -61,7 +61,7 @@ handwriting-recognition/
 2. **Phase 2**: Extract embeddings (remove softmax)
 3. **Phase 3**: Train Siamese network for similarity
 
-## 🖥️ Run API + Web (Basic Scoring Flow)
+## 🖥️ Run API + Web (Scoring + Sheet Creation)
 
 ### 1. Start FastAPI backend
 
@@ -80,10 +80,19 @@ python3 -m http.server 5173
 
 - http://localhost:5173
 
-### Main endpoint for sheet scoring
+### Main endpoints for web workflows
 
 - `POST /sheet/score`
 - Form field `file`: image upload (png/jpg/webp)
+
+- `GET /sheet/options`
+- Returns create-form defaults, language options, and available server fonts
+
+- `POST /sheet/create`
+- Supports either `server_font` or uploaded `font_file` plus optional `custom_text` and advanced layout fields
+
+- `GET /sheet/files/{filename}`
+- Serves generated PDF/PNG artifacts for preview and download
 
 Response includes:
 - `overall_score` (0-100)
@@ -94,6 +103,7 @@ Response includes:
 Notes:
 - `/sheet/score` requires EasyOCR initialization; if unavailable, the API returns `503 Service Unavailable`.
 - Web app always shows row `ocr_label` with row score; extracted box overlay can be toggled on/off in preview.
+- Server-hosted create fonts are discovered from `sheet.fonts_dir` in `config/default.yaml`.
 
 ## 🐳 Run With Docker (Dev)
 

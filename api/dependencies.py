@@ -7,8 +7,8 @@ from pathlib import Path
 from typing import Any
 
 import torch
-import yaml
 from src.easy_ocr.easyocr import EasyOCRDetector
+from src.utils.config import load_config
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CONFIG_PATH = PROJECT_ROOT / "config" / "default.yaml"
@@ -39,24 +39,23 @@ class DummyEncoder(torch.nn.Module):
         return output
 
 
-def _load_config() -> dict[str, Any]:
-    if not DEFAULT_CONFIG_PATH.exists():
-        return {}
+@lru_cache(maxsize=1)
+def _load_config() -> Any:
+    return load_config(DEFAULT_CONFIG_PATH)
 
-    with DEFAULT_CONFIG_PATH.open("r", encoding="utf-8") as handle:
-        loaded = yaml.safe_load(handle) or {}
-    if not isinstance(loaded, dict):
-        return {}
-    return loaded
+
+def get_config() -> Any:
+    """Return resolved application config (cached)."""
+    return _load_config()
 
 
 def _get_model_path(key: str) -> Path | None:
-    config = _load_config()
-    inference_config = config.get("inference", {})
-    model_path = inference_config.get(key)
+    config = get_config()
+    inference_config = getattr(config, "inference", None)
+    model_path = getattr(inference_config, key, None)
     if not model_path:
         return None
-    return PROJECT_ROOT / str(model_path)
+    return Path(str(model_path))
 
 
 def _load_torchscript_module(path: Path) -> torch.nn.Module | None:

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Handwriting Sheet Scorer</title>
+  <title>Handwriting Sheet Studio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
@@ -12,19 +12,136 @@
 <body>
   <main class="layout">
     <section class="card card-input">
-      <h1>Handwriting Sheet Scorer</h1>
-      <p class="subtitle">Upload your handwriting sheet and get row-level similarity scoring.</p>
+      <h1>Handwriting Sheet Studio</h1>
+      <p class="subtitle">Score uploaded sheets or generate new handwriting practice sheets with configurable layout.</p>
 
       <form id="score-form" class="form">
-        <label class="field">
-          <span>Handwriting sheet image</span>
-          <input id="sheet-file" name="file" type="file" accept="image/*" required />
-        </label>
+        <div class="mode-toggle" role="radiogroup" aria-label="Form mode">
+          <label class="mode-option">
+            <input type="radio" name="mode" value="score" checked />
+            <span>Score Sheet</span>
+          </label>
+          <label class="mode-option">
+            <input type="radio" name="mode" value="create" />
+            <span>Create Handwriting Sheet</span>
+          </label>
+        </div>
 
-        <label class="overlay-toggle" for="show-overlay">
-          <input id="show-overlay" type="checkbox" />
-          <span>Show extracted boxes overlay</span>
-        </label>
+        <div id="score-fields" class="mode-panel">
+          <label class="field">
+            <span>Handwriting sheet image</span>
+            <input id="sheet-file" name="file" type="file" accept="image/*" required />
+          </label>
+
+          <div class="overlay-control">
+            <span class="overlay-control-label">Extracted boxes overlay</span>
+            <div class="overlay-tabs" role="radiogroup" aria-label="Extracted boxes overlay visibility">
+              <label class="overlay-tab">
+                <input type="radio" name="overlay-mode" value="off" checked />
+                <span>Overlay Off</span>
+              </label>
+              <label class="overlay-tab">
+                <input type="radio" name="overlay-mode" value="boxes" />
+                <span>Show extracted boxes</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div id="create-fields" class="mode-panel hidden">
+          <div class="font-source-toggle" role="radiogroup" aria-label="Font source">
+            <label class="mode-option">
+              <input type="radio" name="font-source" value="server" checked />
+              <span>Use server font</span>
+            </label>
+            <label class="mode-option">
+              <input type="radio" name="font-source" value="upload" />
+              <span>Upload font file</span>
+            </label>
+          </div>
+
+          <label class="field" id="server-font-field">
+            <span>Server font</span>
+            <select id="server-font" name="server_font"></select>
+            <small id="server-font-help">No server fonts loaded yet.</small>
+          </label>
+
+          <label class="field hidden" id="font-upload-field">
+            <span>Upload font (.ttf or .otf)</span>
+            <input id="font-file" name="font_file" type="file" accept=".ttf,.otf,font/ttf,font/otf" />
+          </label>
+
+          <label class="field">
+            <span>Language</span>
+            <select id="create-language" name="language">
+              <option value="auto">Auto detect from font</option>
+              <option value="en">English</option>
+              <option value="vi">Vietnamese</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Custom text (optional)</span>
+            <textarea
+              id="custom-text"
+              name="custom_text"
+              rows="6"
+              placeholder="Leave blank to use default text from config."
+            ></textarea>
+          </label>
+
+          <label class="field">
+            <span>Output name (optional)</span>
+            <input id="output-basename" name="output_basename" type="text" placeholder="practice_sheet_v1" />
+            <small>Allowed characters: letters, numbers, underscore, dash.</small>
+          </label>
+
+          <details class="advanced-panel">
+            <summary>Advanced layout settings</summary>
+            <div class="advanced-grid">
+              <label class="field compact">
+                <span>Font size</span>
+                <input id="font-size" name="font_size" type="number" min="1" max="200" />
+              </label>
+              <label class="field compact">
+                <span>Line spacing</span>
+                <input id="line-spacing" name="line_spacing" type="number" min="1" max="400" />
+              </label>
+              <label class="field compact">
+                <span>Word spacing</span>
+                <input id="word-spacing" name="word_spacing" type="number" min="1" max="400" />
+              </label>
+              <label class="field compact">
+                <span>Margin left</span>
+                <input id="margin-left" name="margin_left" type="number" min="0" max="2000" />
+              </label>
+              <label class="field compact">
+                <span>Margin right</span>
+                <input id="margin-right" name="margin_right" type="number" min="0" max="2000" />
+              </label>
+              <label class="field compact">
+                <span>Margin top</span>
+                <input id="margin-top" name="margin_top" type="number" min="0" max="2000" />
+              </label>
+              <label class="field compact">
+                <span>Margin bottom</span>
+                <input id="margin-bottom" name="margin_bottom" type="number" min="0" max="2000" />
+              </label>
+              <label class="field compact">
+                <span>Divide horizontal</span>
+                <input id="divide-horizontal" name="divide_horizontal" type="number" min="0" max="2000" />
+              </label>
+              <label class="field compact">
+                <span>Divide vertical</span>
+                <input id="divide-vertical" name="divide_vertical" type="number" min="0" max="2000" />
+              </label>
+              <label class="field compact toggle-field">
+                <span>Show vertical line</span>
+                <input id="show-vertical-line" name="show_vertical_line" type="checkbox" />
+              </label>
+            </div>
+          </details>
+        </div>
 
         <button id="submit-btn" type="submit">Score Sheet</button>
       </form>
@@ -32,7 +149,7 @@
       <p id="status" class="status" role="status"></p>
     </section>
 
-    <section class="card card-preview">
+    <section class="card">
       <h2>Preview</h2>
       <div class="preview-wrap">
         <div id="preview-canvas" class="preview-canvas">
@@ -43,18 +160,26 @@
       </div>
     </section>
 
-    <section class="card card-results">
+    <section class="card">
       <h2>Results</h2>
       <div id="summary" class="summary hidden"></div>
+      <div id="create-output" class="create-output hidden">
+        <p id="create-meta" class="create-meta"></p>
+        <div class="create-links">
+          <a id="preview-link" class="action-link" href="#" target="_blank" rel="noopener noreferrer">Open Preview Image</a>
+          <a id="pdf-link" class="action-link" href="#" target="_blank" rel="noopener noreferrer">Download PDF</a>
+          <a id="png-link" class="action-link" href="#" target="_blank" rel="noopener noreferrer">Download PNG</a>
+        </div>
+      </div>
       <div class="table-wrap hidden" id="table-wrap">
         <table>
           <thead>
             <tr>
               <th>Row</th>
-              <th>Label</th>
-              <th>Split Count</th>
+              <th>Reference Char</th>
+              <th>Compared Chars</th>
               <th>Row Score</th>
-              <th>Comparison Scores (vs split[0])</th>
+              <th>Comparison Scores (vs Reference Char)</th>
             </tr>
           </thead>
           <tbody id="rows-body"></tbody>
